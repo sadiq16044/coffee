@@ -1,0 +1,13 @@
+@font-face {
+    font-family: 'helvetica_neuethin';
+    src: url('helveticaneue-thin-13-webfont.woff2') format('woff2'), url('helveticaneue-thin-13-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'helvetica_neueultralight';
+    src: url('helveticaneue-ultralight-06-webfont.woff2') format('woff2'), url('helveticaneue-ultralight-06-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}

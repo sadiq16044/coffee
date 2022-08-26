@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>RoundSlider</title>
+    <script src="/js/jquery-1.11.3.min.js"></script>
+    <link href="/js/roundslider.min.css" rel="stylesheet" />
+    <script src="/js/roundslider.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/js/skins/yellowcircle.css">
+    <link rel="stylesheet" type="text/css" href="/js/skins/purplecircle.css">
+    <link rel="stylesheet" type="text/css" href="/js/skins/firecircle.css">
+    <link rel="stylesheet" type="text/css" href="/js/skins/whitecircle.css">
+    <link rel="stylesheet" type="text/css" href="/js/skins/simplecircle.css">
+    <link rel="stylesheet" type="text/css" href="/js/circle.css">
+    <script type="text/javascript" src="/js/circle.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+</head>
+
+<body style="background-color: black;">
+
+    <input type="hidden" id="temp" name="temp" value="89">
+    <input type="hidden" id="druck" name="druck" value="9">
+    <input type="hidden" id="bezug" name="bezug" value="25">
+    <input type="hidden" id="standby" name="standby" value="30">
+
+    <div id="fade1" class="full-page" style="color: white;">
+        <center>
+            <h2>munaco</h2>
+        </center>
+    </div>
+
+    <div id="full-page1" class="full-page" style="display: none;">
+
+        <div id="myCarousel-indicators" class="carousel slide" data-ride="carousel">
+
+            <ol class="carousel-indicators">
+                <li data-target="#myCarousel-indicators" data-slide-to="0" class="active"></li>
+                <li data-target="#myCarousel-indicators" data-slide-to="1"></li>
+                <li data-target="#myCarousel-indicators" data-slide-to="2"></li>
+                <li data-target="#myCarousel-indicators" data-slide-to="3"></li>
+                <li data-target="#myCarousel-indicators" data-slide-to="4"></li>
+            </ol>
+
+            <div class="carousel-inner">
+                <div class="carousel-item" data-touch="true" data-interval="false">
+                    <div style="margin-bottom: 75px;">
+                        <div id="circle-bar" data-circle-dialWidth=10 data-circle-skin="white">
+                            <div class="loader-bg">
+                                <div class="text">0%</div>
+                            </div>
+                        </div>
+                        <div id="not-pushed" style="display: none;">
+                            <button><img src="/images/not-pushed.png" alt=""></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item active" data-touch="true" data-interval="false">
+                    <div style="margin-bottom: 75px;">
+                        <center>
+                            <p style="margin-top: 50px; color: #540e08; font-size: 25px;">Temperature</p>
+                        </center>
+                        <div id="temp-slider">
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item" data-touch="true" data-interval="false">
+                    <div style="margin-bottom: 75px;">
+                        <center>
+                            <p style="margin-top: 50px; color: #667b99; font-size: 25px;">Pressure</p>
+                        </center>
+                        <div id="druck-slider">
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item" data-touch="true" data-interval="false">
+                    <div style="margin-bottom: 75px;">
+                        <center>
+                            <p style="margin-top: 50px; color: #998f66; font-size: 25px;">Bezugszeit</p>
+                        </center>
+                        <div id="bezug-slider">
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item" data-touch="true" data-interval="false">
+                    <div style="margin-bottom: 75px;">
+                        <center>
+                            <p style="margin-top: 50px; color: #7a9966; font-size: 25px;">Standby</p>
+                        </center>
+                        <div id="standby-slider">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    let screenWidth = screen.width;
+
+    function tooltipTemp(args) {
+        return args.value + " <br> °C";
+    }
+
+    function tooltipDruck(args) {
+        return args.value + " <br> bar";
+    }
+
+    function tooltipBezug(args) {
+        return args.value + " <br> sek";
+    }
+
+    function tooltipStandby(args) {
+        return args.value + " <br> min";
+    }
+
+    $(document).ready(function() {
+
+        $('.carousel').carousel({ // stopping automatic slides
+            interval: false
+        });
+
+        $("#fade1").fadeOut(5000); // removing the div after 5 secs with fading effects
+
+        setTimeout(function() {
+
+            $('#full-page1').fadeIn(1000); // showing the carousel slides
+
+            setTimeout(function() { // things to do after 9 minutes progress bar
+                $('#circle-bar').fadeOut(10); // fadeout the progress bar
+                $('#not-pushed').fadeIn(1000); // showing the carousel
+            }, 540000); // run after 9 mins  (i.e 9*60*1000 ms)
+        }, 5000);
+
+        new Circlebar({
+            element: "#circle-bar",
+            maxValue: 100,
+            size: "240px",
+            fontSize: "30px",
+            type: "progress",
+            counter: 100
+        });
+
+        $.fn.roundSlider.prototype._handleDragDistance = 90;
+
+        $("#temp-slider").roundSlider({
+            svgMode: true,
+            handleShape: "round",
+            sliderType: "min-range",
+            handleSize: 10,
+            showTooltip: true,
+            editableTooltip: false,
+            min: 86,
+            max: 94,
+            step: 0.1,
+            value: $("#temp").val(),
+            startAngle: 90,
+            endAngle: 90,
+            radius: screenWidth / 8,
+            borderWidth: 0,
+            width: 30,
+            rangeColor: '#540e08',
+            pathColor: '#735654',
+            lineCap: 'round',
+            tooltipFormat: "tooltipTemp",
+            change: function(args) {
+                $("#temp").val(args.value.toString());
+                console.log(args.value);
+            }
+        });
+
+        $("#druck-slider").roundSlider({
+            svgMode: true,
+            handleShape: "round",
+            sliderType: "min-range",
+            handleSize: 10,
+            showTooltip: true,
+            editableTooltip: false,
+            min: 8,
+            max: 10,
+            step: 0.1,
+            value: $("#druck").val(),
+            startAngle: 90,
+            endAngle: 90,
+            radius: screenWidth / 8,
+            borderWidth: 0,
+            width: 30,
+            rangeColor: '#667b99',
+            pathColor: '#2d3643',
+            lineCap: 'round',
+            tooltipFormat: "tooltipDruck",
+            change: function(args) {
+                $("#druck").val(args.value.toString());
+                console.log(args.value);
+            }
+        });
+
+        $("#bezug-slider").roundSlider({
+            svgMode: true,
+            handleShape: "round",
+            sliderType: "min-range",
+            handleSize: 10,
+            showTooltip: true,
+            editableTooltip: false,
+            min: 15,
+            max: 45,
+            step: 1,
+            value: $("#bezug").val(),
+            startAngle: 90,
+            endAngle: 90,
+            radius: screenWidth / 8,
+            borderWidth: 0,
+            width: 30,
+            rangeColor: '#998f66',
+            pathColor: '#2b2b26',
+            lineCap: 'round',
+            tooltipFormat: "tooltipBezug",
+            change: function(args) {
+                $("#bezug").val(args.value.toString());
+                console.log(args.value);
+            }
+        });
+
+        $("#standby-slider").roundSlider({
+            svgMode: true,
+            handleShape: "round",
+            sliderType: "min-range",
+            handleSize: 10,
+            showTooltip: true,
+            editableTooltip: false,
+            min: 15,
+            max: 45,
+            step: 1,
+            value: $("#standby").val(),
+            startAngle: 90,
+            endAngle: 90,
+            radius: screenWidth / 8,
+            borderWidth: 0,
+            width: 30,
+            rangeColor: '#7a9966',
+            pathColor: '#263129',
+            lineCap: 'round',
+            tooltipFormat: "tooltipStandby",
+            change: function(args) {
+                $("#standby").val(args.value.toString());
+                console.log(args.value);
+            }
+        });
+    });
+</script>
+
+
+<style>
+    img {
+        height: 60vh;
+        width: 60vh;
+    }
+    
+    #circle-bar {
+        height: 100%;
+        width: 100%;
+    }
+    
+    .full-page {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    #temp-slider .rs-tooltip-text {
+        color: #540e08 !important;
+        font-size: 30px;
+        font-weight: bold;
+    }
+    
+    #bezug-slider .rs-tooltip-text {
+        color: #998f66 !important;
+        font-size: 30px;
+        font-weight: bold;
+    }
+    
+    #druck-slider .rs-tooltip-text {
+        color: #667b99 !important;
+        font-size: 30px;
+        font-weight: bold;
+    }
+    
+    #standby-slider .rs-tooltip-text {
+        color: #7a9966 !important;
+        font-size: 30px;
+        font-weight: bold;
+    }
+    
+    img {
+        height: 60vh
+    }
+    
+    #myCarousel-indicators ol li {
+        border-radius: 100%;
+        height: 15px;
+        width: 15px;
+    }
+</style>
+
+</html>
