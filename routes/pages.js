@@ -27,28 +27,6 @@ router.get('/', (req, res) => {
 });
 
 /*
- * Get /test
- */
-router.get('/test', (req, res) => {
-
-    // Parameter.findOne({ sorting: 100 }, function (err, parameters) {
-    //     if (err) console.log(err);
-
-    //     res.render('index1.ejs', {
-    //         parameters: parameters
-    //     })
-    // });
-    res.render('index.ejs', {
-        parameters: {
-            temperature: 88.5,
-            druck: 8.9,
-            bezugszeit: 20.1,
-            standBy: 30,
-        }
-    })
-});
-
-/*
  * Get /parameter-values (Current Parameters)
  */
 router.get('/parameter-values', (req, res) => {
