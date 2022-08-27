@@ -20,9 +20,7 @@
     <input type="hidden" id="standBy" name="standBy" value="<%= parameters.standBy%>">
 
     <div id="fade1" class="fade-page" style="color: white; display: none;">
-        <center>
-            <img src="/images/Branding.png" style="width: 400px; height: 150px; margin: 0;" alt="">
-        </center>
+        <img src="/images/Branding.png" style="width: 400px; height: 150px; margin: 0;" alt="">
     </div>
 
     <div id="full-page1" class="full-page" style="display: none;">
@@ -37,11 +35,11 @@
             </ol>
 
             <div class="carousel-inner">
-                <div class="carousel-item active" data-touch="true" data-interval="false" transition: transform 2s ease, opacity .5s ease-out>
+                <div class="carousel-item active" data-touch="true" data-interval="false" transition: transform 2s ease, opacity 2s ease-out>
 
                     <div id="progress-circle">
                         <div class="progress-gradient"></div>
-                        <div id="progress-bar" style="margin-top: 76px;">
+                        <div id="progress-bar" style="margin-top: 105px;">
                         </div>
                     </div>
 
@@ -64,7 +62,7 @@
                         <p id="parameter-name" style="color: rgba(153, 102, 114, 1);">Temperature</p>
                     </center>
                     <div class="circle-gradient"></div>
-                    <div id="temp-slider">
+                    <div id="temp-slider" class="circular-slider">
                     </div>
                 </div>
                 <div class="carousel-item" data-touch="true" data-interval="false">
@@ -72,7 +70,7 @@
                         <p id="parameter-name" style="color: rgba(102, 123, 153, 1);">Druck</p>
                     </center>
                     <div class="circle-gradient"></div>
-                    <div id="druck-slider">
+                    <div id="druck-slider" class="circular-slider">
                     </div>
                 </div>
                 <div class="carousel-item" data-touch="true" data-interval="false">
@@ -80,7 +78,7 @@
                         <p id="parameter-name" style="color: rgba(153, 143, 102, 1);">Bezugszeit</p>
                     </center>
                     <div class="circle-gradient"></div>
-                    <div id="bezug-slider">
+                    <div id="bezug-slider" class="circular-slider">
                     </div>
                 </div>
                 <div class="carousel-item" data-touch="true" data-interval="false">
@@ -88,7 +86,7 @@
                         <p id="parameter-name" style="color: rgba(122, 153, 102, 1);">Standby</p>
                     </center>
                     <div class="circle-gradient"></div>
-                    <div id="standBy-slider">
+                    <div id="standBy-slider" class="circular-slider">
                     </div>
                 </div>
             </div>
@@ -135,12 +133,8 @@
     function progressBar() {
         progress_counter++;
         $("#progress-bar").roundSlider("setValue", progress_counter);
-
-        console.log(progress_counter)
         if (progress_counter >= 100) { // stopping progress bar increment value
-
             clearInterval(progress_bar);
-
             setTimeout(function() { // things to do after 9 minutes progress bar
                 $('#progress-circle').fadeOut(500); // fadeout the progress bar
                 setTimeout(() => $('#not-pushed').fadeIn(1000), 500) // showing the carousel
@@ -152,18 +146,15 @@
     function makingTime() {
         // making_counter += 0.1;
         making_counter++;
-
         $("#making_time_text").text(parseFloat(making_counter * 0.1).toFixed(1).toString().replace('.', ','));
-        console.log(parseFloat($("#bezug").val()).toFixed(1) + making_counter)
+        console.log(making_counter * 0.1)
         if (making_counter >= parseInt($("#bezug").val() * 10)) { // stopping progress bar increment value
             // if (making_counter <= 0) { // stopping progress bar increment value
-
             clearInterval(making_timer);
-            making_counter = 0;
-
             setTimeout(function() { // things to do after 9 minutes progress bar
                 $('#pushed').fadeOut(500); // fadeout the after pushed button
                 $('#making_time').fadeOut(500); // fadeout the after pushed button
+                making_counter = 0;
                 setTimeout(() => {
                     $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
                     $('.carousel-indicators').fadeIn(1000); // showing the carousel
@@ -171,11 +162,9 @@
             }, 4000); // time of progress bar to complete 100%
         }
     }
-
     $(document).ready(function() {
-
+        console.log("Screeen Height: " + screen.height)
         $("#not-pushed").click(function() {
-
             $.ajax({ // sending values to db
                 method: 'POST',
                 url: '/update-parameters',
@@ -189,32 +178,29 @@
             }).done(function(result) {
                 console.log(result)
             });
-
             // $('#not-pushed').fadeOut(100); // fadeout the before pushed button
             // $('#pushed').fadeIn(1000); // fadeIn the after pushed button
             // $('.carousel-indicators').fadeOut(100); // showing the carousel
             // $('#making_time').fadeIn(1000);
-
             $('#not-pushed').fadeOut(500); // fadeout the before pushed button
             $('.carousel-indicators').fadeOut(500); // showing the carousel
-
             setTimeout(() => {
-                $('#making_time').fadeIn(1000);
-                $('#pushed').fadeIn(1000); // fadeIn the after pushed button
-                making_timer = setInterval(makingTime, 100);
-            }, 500)
-
-            // setTimeout(function() { // things to do after bezugs time
-            //     $('#pushed').fadeOut(100); // fadeout the after pushed button
-            //     $('#making_time').fadeOut(100); // fadeout the after pushed button
-            //     $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
-            //     $('.carousel-indicators').fadeIn(1000); // showing the carousel
-            // }, ($("#bezug").val() * 1000)); // run after bezugs time
+                    $('#making_time').fadeIn(1000);
+                    $('#pushed').fadeIn(1000); // fadeIn the after pushed button
+                    making_timer = setInterval(makingTime, 100);
+                }, 500)
+                // setTimeout(function() { // things to do after bezugs time
+                //     $('#pushed').fadeOut(100); // fadeout the after pushed button
+                //     $('#making_time').fadeOut(100); // fadeout the after pushed button
+                //     $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
+                //     $('.carousel-indicators').fadeIn(1000); // showing the carousel
+                // }, ($("#bezug").val() * 1000)); // run after bezugs time
         });
-
         $("#switch-off").click(function() {
-
             setTimeout(function() { // things to do after 9 minutes progress bar
+
+                clearInterval(making_timer);
+                making_counter = 0;
                 $('#pushed').fadeOut(500); // fadeout the after pushed button
                 $('#making_time').fadeOut(500); // fadeout the after pushed button
                 setTimeout(() => {
@@ -223,25 +209,18 @@
                 }, 500)
             }, 1000); // time of progress bar to complete 100%
         });
-
         $('.carousel').carousel({
             interval: false
         })
-
         $("#fade1").fadeIn(5000); // removing the div after 5 secs with fading effects
         setTimeout(() => $("#fade1").fadeOut(5000), 5000)
             // $("#fade1").fadeOut(5000); // removing the div after 5 secs with fading effects
-
         setTimeout(function() {
-
             $('#full-page1').fadeIn(1000); // showing the carousel slides
-
-            progress_bar = setInterval(progressBar, 1);
-
-        }, 1000); // branding logo 10 seconds delay
+            progress_bar = setInterval(progressBar, 600);
+        }, 10000); // branding logo 10 seconds delay
 
         $.fn.roundSlider.prototype._handleDragDistance = 90;
-
         $("#progress-bar").roundSlider({
             svgMode: true,
             handleShape: "round",
@@ -264,7 +243,6 @@
             lineCap: 'round',
             tooltipFormat: "tooltipProgress"
         });
-
         $("#temp-slider").roundSlider({
             svgMode: true,
             handleShape: "round",
@@ -290,7 +268,6 @@
                 console.log(args.value);
             }
         });
-
         $("#druck-slider").roundSlider({
             svgMode: true,
             handleShape: "round",
@@ -316,7 +293,6 @@
                 console.log(args.value);
             }
         });
-
         $("#bezug-slider").roundSlider({
             svgMode: true,
             handleShape: "round",
@@ -342,7 +318,6 @@
                 console.log(args.value);
             }
         });
-
         $("#standBy-slider").roundSlider({
             svgMode: true,
             handleShape: "round",
@@ -372,47 +347,6 @@
 </script>
 
 <style>
-    #parameter-name {
-        font-family: 'helvetica_neueultralight';
-        font-size: 40px;
-    }
-    
-    img {
-        margin-top: 76px;
-        height: 500px;
-        width: 500px;
-        background-color: black;
-    }
-    
-    #making_time {
-        color: rgba(216, 213, 213, 1) !important;
-        font-family: 'helvetica_neueultralight' !important;
-        font-size: 60px;
-        width: 100%;
-        position: absolute;
-    }
-    
-    #making_time_text {
-        color: rgba(216, 213, 213, 1) !important;
-        font-family: 'helvetica_neueultralight' !important;
-        font-size: 60px;
-        /* margin-top: 600px; */
-        margin-top: 24px;
-        display: flex;
-        justify-content: center;
-    }
-    
-    #pushed,
-    #not-pushed {
-        display: flex;
-        justify-content: center;
-    }
-    
-    .carousel-item {
-        height: 690px !important;
-        min-width: 500px !important;
-    }
-    
     .fade-page {
         position: absolute;
         top: 50%;
@@ -425,18 +359,69 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        min-width: 500px;
-        height: 690px;
+        width: 800px;
+        height: 800px;
     }
     
-    .rs-tooltip-text {
-        color: rgba(216, 213, 213, 1) !important;
-        font-family: 'helvetica_neueultralight' !important;
-        font-size: 80px;
+    #fade1 img {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: 150px;
     }
     
-    #progress-bar .rs-handle {
-        background-color: rgba(216, 213, 213, 1) !important;
+    #myCarousel-indicators {
+        width: inherit !important;
+        /* height: inherit !important; */
+    }
+    
+    .carousel-inner {
+        width: inherit !important;
+        /* height: inherit !important; */
+        /* height: 95% !important; */
+    }
+    
+    .carousel-item {
+        width: 500px !important;
+        height: 710px !important;
+        margin-top: 45px;
+        margin-left: 150px;
+    }
+    
+    #parameter-name {
+        font-family: 'helvetica_neueultralight';
+        font-size: 40px;
+        margin-bottom: 0px;
+    }
+    
+    .circular-slider {
+        width: inherit !important;
+        height: 500px !important;
+        margin-top: 45px !important;
+        margin-bottom: 70px;
+    }
+    
+    #pushed img,
+    #not-pushed img {
+        width: 500px;
+        height: 500px;
+        margin-top: 105px;
+        background-color: black;
+    }
+    
+    .circle-gradient {
+        position: absolute;
+        width: 380px;
+        height: 380px;
+        border-radius: 50%;
+        margin-top: 105px;
+        margin-left: 60px;
+        /* background-color: #232932 !important; */
+        /* background: rgb(47, 55, 66); */
+        /* background: linear-gradient(1deg, rgba(47, 55, 66, 1) 100%, rgba(10, 13, 9, 1) 100%); */
+        background: linear-gradient(1.0turn, #090b0d, #2f3742);
     }
     
     .progress-gradient {
@@ -451,20 +436,43 @@
         background: linear-gradient(1.0turn, #090b0d, #2f3742);
     }
     
-    #temp-slider .rs-handle {
-        background-color: rgba(153, 102, 114, 1) !important;
+    #myCarousel-indicators ol li {
+        border-radius: 100%;
+        height: 15px;
+        width: 15px;
     }
     
-    .circle-gradient {
-        position: absolute;
-        width: 380px;
-        height: 380px;
-        border-radius: 50%;
-        margin: 60px;
-        /* background-color: #232932 !important; */
-        /* background: rgb(47, 55, 66); */
-        /* background: linear-gradient(1deg, rgba(47, 55, 66, 1) 100%, rgba(10, 13, 9, 1) 100%); */
-        background: linear-gradient(1.0turn, #090b0d, #2f3742);
+    #myCarousel-indicators ol {
+        margin-bottom: 0px !important;
+    }
+    
+    #making_time {
+        width: inherit;
+    }
+    
+    #making_time_text {
+        color: rgba(216, 213, 213, 1) !important;
+        font-family: 'helvetica_neueultralight' !important;
+        font-size: 60px;
+        /* margin-top: 600px; */
+        margin-top: 25.5px;
+        display: flex;
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .rs-tooltip-text {
+        color: rgba(216, 213, 213, 1) !important;
+        font-family: 'helvetica_neueultralight' !important;
+        font-size: 80px;
+    }
+    
+    #progress-bar .rs-handle {
+        background-color: rgba(216, 213, 213, 1) !important;
+    }
+    
+    #temp-slider .rs-handle {
+        background-color: rgba(153, 102, 114, 1) !important;
     }
     
     #bezug-slider .rs-handle {
@@ -477,12 +485,6 @@
     
     #standBy-slider .rs-handle {
         background-color: rgba(122, 153, 102, 1) !important;
-    }
-    
-    #myCarousel-indicators ol li {
-        border-radius: 100%;
-        height: 15px;
-        width: 15px;
     }
 </style>
 

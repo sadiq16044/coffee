@@ -2,17 +2,11 @@
 <html>
 
 <head>
-    <title>RoundSlider - A sample demo</title>
+    <title>RoundSlider</title>
     <script src="/js/jquery-1.11.3.min.js"></script>
     <link href="/js/roundslider.min.css" rel="stylesheet" />
     <script src="/js/roundslider.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/js/circle.css">
-    <link rel="stylesheet" type="text/css" href="/js/skins/yellowcircle.css">
-    <link rel="stylesheet" type="text/css" href="/js/skins/purplecircle.css">
-    <link rel="stylesheet" type="text/css" href="/js/skins/firecircle.css">
-    <link rel="stylesheet" type="text/css" href="/js/skins/whitecircle.css">
-    <link rel="stylesheet" type="text/css" href="/js/skins/simplecircle.css">
-    <script type="text/javascript" src="/js/circle.js"></script>
+    <link href="/fonts/fonts.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
@@ -20,87 +14,502 @@
 
 <body style="background-color: black;">
 
-    <div id="circle-3" data-circle-dialWidth=10 data-circle-skin="white">
-        <div class="loader-bg">
-            <div class="text">0%</div>
+    <input type="hidden" id="temp" name="temp" value="<%= parameters.temperature%>">
+    <input type="hidden" id="druck" name="druck" value="<%= parameters.druck%>">
+    <input type="hidden" id="bezug" name="bezug" value="<%= parameters.bezugszeit%>">
+    <input type="hidden" id="standBy" name="standBy" value="<%= parameters.standBy%>">
+
+    <div id="fade1" class="full-page" style="color: white;">
+        <img id="logo" src="/images/Branding.png">
+    </div>
+
+    <div id="full-page1" class="full-page">
+        <div id="myCarousel-indicators" class="carousel slide" data-ride="carousel">
+
+            <ol class="carousel-indicators">
+                <li data-target="#myCarousel-indicators" data-slide-to="0" class="active"></li>
+                <li data-target="#myCarousel-indicators" data-slide-to="1"></li>
+                <li data-target="#myCarousel-indicators" data-slide-to="2"></li>
+                <li data-target="#myCarousel-indicators" data-slide-to="3"></li>
+                <li data-target="#myCarousel-indicators" data-slide-to="4"></li>
+            </ol>
+
+            <div class="carousel-inner">
+                <div class="carousel-item active" data-touch="true" data-interval="false" transition: transform 2s ease, opacity .5s ease-out>
+
+                    <div id="progress-circle" style="display: none;" class="circular-slider">
+                        <div class="progress-gradient"></div>
+                        <div id="progress-bar" style="margin-top: 76px;">
+                        </div>
+                    </div>
+
+                    <div id="not-pushed">
+                        <button id="switch-on" style="background-color: black; border: none; outline: none;"><img src="/images/bp.png"></button>
+                    </div>
+
+                    <div id="pushed" style="display: none;">
+                        <!-- <div>
+                            <button id="switch-off" style="background-color: black; border: none; outline: none;"><img src="/images/After-pushed.png"></button>
+                        </div> -->
+                        <div id="making_time" style="display: none;">
+                            <button id="switch-off" style="background-color: black; border: none; outline: none;"><img src="/images/After-pushed.png"></button>
+                            <p id="making_time_text"></p>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="carousel-item" data-touch="true" data-interval="false">
+                    <center>
+                        <p id="parameter-name" style="color: rgba(153, 102, 114, 1);">Temperature</p>
+                    </center>
+                    <div class="circle-gradient"></div>
+                    <div id="temp-slider" class="circular-slider">
+                    </div>
+                </div>
+                <div class="carousel-item" data-touch="true" data-interval="false">
+                    <center>
+                        <p id="parameter-name" style="color: rgba(102, 123, 153, 1);">Druck</p>
+                    </center>
+                    <div class="circle-gradient"></div>
+                    <div id="druck-slider" class="circular-slider">
+                    </div>
+                </div>
+                <div class="carousel-item" data-touch="true" data-interval="false">
+                    <center>
+                        <p id="parameter-name" style="color: rgba(153, 143, 102, 1);">Bezugszeit</p>
+                    </center>
+                    <div class="circle-gradient"></div>
+                    <div id="bezug-slider" class="circular-slider">
+                    </div>
+                </div>
+                <div class="carousel-item" data-touch="true" data-interval="false">
+                    <center>
+                        <p id="parameter-name" style="color: rgba(122, 153, 102, 1);">Standby</p>
+                    </center>
+                    <div class="circle-gradient"></div>
+                    <div id="standBy-slider" class="circular-slider">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <center>
-        <p style="margin-top: 50px; color: #540e08">Temperature</p>
-    </center>
-    <div class="new_html_code"></div>
-    <div id="shape" name="temp" class="circle">
-    </div>
 </body>
 
-<script shape="text/javascript">
-    function tooltipLabel(args) {
-        console.log('Here')
-        return args.value + " <br><br> °C";
+<!-- <script>
+    let progress_counter = 0;
+    let making_counter = 0;
+    let progress_bar;
+    let making_timer;
+
+    function tooltipTemp(args) {
+        let temp = parseFloat(args.value).toFixed(1).toString().replace('.', ',');
+        return temp + "<span style='color: rgba(153, 102, 114, 1); font-size: 50px; white-space: pre;'><center>°C</center></span>";
+        // return "<span style='color: white;'>" + temp + "</span>" + " <br> °C";
     }
+
+    function tooltipDruck(args) {
+        let temp = parseFloat(args.value).toFixed(1).toString().replace('.', ',');
+        return temp + "<span style='color: rgba(102, 123, 153, 1); font-size: 50px; white-space: pre;'><center>bar</center></span>";
+        // return "<span style='color: white;'>" + temp + "</span>" + " <br> bar";
+    }
+
+    function tooltipBezug(args) {
+        let temp = parseFloat(args.value).toFixed(1).toString().replace('.', ',');
+        return temp + "<span style='color: rgba(153, 143, 102, 1); font-size: 50px; white-space: pre;'><center>sek</center></span>";
+        // return "<span style='color: white;'>" + temp + "</span>" + " <br> sek";
+    }
+
+    function tooltipStandby(args) {
+        if (args.value == 0) return 'OFF';
+        else return args.value + "<span style='color: rgba(122, 153, 102, 1); font-size: 50px; white-space: pre;'><center>min</center></span>";
+        // return "<span style='color: white;'>" + args.value + "</span>" + " <br> min";
+    }
+
+    function tooltipProgress(args) {
+        return args.value + "%";
+    }
+
+    function progressBar() {
+        progress_counter++;
+        $("#progress-bar").roundSlider("setValue", progress_counter);
+
+        console.log(progress_counter)
+        if (progress_counter >= 100) { // stopping progress bar increment value
+
+            clearInterval(progress_bar);
+
+            setTimeout(function() { // things to do after 9 minutes progress bar
+                $('#progress-circle').fadeOut(500); // fadeout the progress bar
+                setTimeout(() => $('#not-pushed').fadeIn(1000), 500) // showing the carousel
+                    // $('#not-pushed').fadeIn(1000); // showing the carousel
+            }, 1000); // time of progress bar to complete 100%
+        }
+    }
+
+    function makingTime() {
+        // making_counter += 0.1;
+        making_counter++;
+
+        $("#making_time_text").text(parseFloat(making_counter * 0.1).toFixed(1).toString().replace('.', ','));
+        console.log(parseFloat($("#bezug").val()).toFixed(1) + making_counter)
+        if (making_counter >= parseInt($("#bezug").val() * 10)) { // stopping progress bar increment value
+            // if (making_counter <= 0) { // stopping progress bar increment value
+
+            clearInterval(making_timer);
+            making_counter = 0;
+
+            setTimeout(function() { // things to do after 9 minutes progress bar
+                $('#pushed').fadeOut(500); // fadeout the after pushed button
+                $('#making_time').fadeOut(500); // fadeout the after pushed button
+                setTimeout(() => {
+                    $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
+                    $('.carousel-indicators').fadeIn(1000); // showing the carousel
+                }, 500)
+            }, 4000); // time of progress bar to complete 100%
+        }
+    }
+
     $(document).ready(function() {
 
-        new Circlebar({
-            element: "#circle-3",
-            maxValue: 100,
-            size: "240px",
-            fontSize: "30px",
-            type: "progress"
+        $("#not-pushed").click(function() {
+
+            $.ajax({ // sending values to db
+                method: 'POST',
+                url: '/update-parameters',
+                dataType: 'json',
+                data: {
+                    temperature: $("#temp").val(),
+                    druck: $("#druck").val(),
+                    bezugszeit: $("#bezug").val(),
+                    standBy: $("#standBy").val(),
+                }
+            }).done(function(result) {
+                console.log(result)
+            });
+
+            // $('#not-pushed').fadeOut(100); // fadeout the before pushed button
+            // $('#pushed').fadeIn(1000); // fadeIn the after pushed button
+            // $('.carousel-indicators').fadeOut(100); // showing the carousel
+            // $('#making_time').fadeIn(1000);
+
+            $('#not-pushed').fadeOut(500); // fadeout the before pushed button
+            $('.carousel-indicators').fadeOut(500); // showing the carousel
+
+            setTimeout(() => {
+                $('#making_time').fadeIn(1000);
+                $('#pushed').fadeIn(1000); // fadeIn the after pushed button
+                making_timer = setInterval(makingTime, 100);
+            }, 500)
+
+            // setTimeout(function() { // things to do after bezugs time
+            //     $('#pushed').fadeOut(100); // fadeout the after pushed button
+            //     $('#making_time').fadeOut(100); // fadeout the after pushed button
+            //     $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
+            //     $('.carousel-indicators').fadeIn(1000); // showing the carousel
+            // }, ($("#bezug").val() * 1000)); // run after bezugs time
         });
 
-        $.fn.roundSlider.prototype._handleDragDistance = 270;
-        let width = screen.width / 8;
-        $("#shape").roundSlider({
+        $("#switch-off").click(function() {
+
+            setTimeout(function() { // things to do after 9 minutes progress bar
+                $('#pushed').fadeOut(500); // fadeout the after pushed button
+                $('#making_time').fadeOut(500); // fadeout the after pushed button
+                setTimeout(() => {
+                    $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
+                    $('.carousel-indicators').fadeIn(1000); // showing the carousel
+                }, 500)
+            }, 1000); // time of progress bar to complete 100%
+        });
+
+        $('.carousel').carousel({
+            interval: false
+        })
+
+        $("#fade1").fadeIn(5000); // removing the div after 5 secs with fading effects
+        // setTimeout(() => $("#fade1").fadeOut(5000), 5000)
+        // $("#fade1").fadeOut(5000); // removing the div after 5 secs with fading effects
+
+        setTimeout(function() {
+
+            $('#full-page1').fadeIn(1000); // showing the carousel slides
+
+            progress_bar = setInterval(progressBar, 1);
+
+        }, 100000); // branding logo 10 seconds delay
+
+        $.fn.roundSlider.prototype._handleDragDistance = 90;
+
+        $("#progress-bar").roundSlider({
             svgMode: true,
             handleShape: "round",
-            handleSize: 10,
+            sliderType: "min-range",
+            readOnly: true,
+            handleSize: 0,
             showTooltip: true,
             editableTooltip: false,
-            min: 84,
-            max: 96,
-            step: 0.1,
-            value: 88,
-            sliderType: "min-range",
+            min: 0,
+            max: 100,
+            step: 1,
+            value: 1,
             startAngle: 90,
             endAngle: 90,
-            radius: width,
+            radius: 250,
             borderWidth: 0,
-            width: 30,
-            tooltipColor: '#FFFFFF',
-            rangeColor: '#540e08',
-            pathColor: '#735654',
+            width: 20,
+            rangeColor: 'rgba(216, 213, 213, 1)',
+            pathColor: 'rgba(216, 213, 213, 0.4)',
             lineCap: 'round',
-            tooltipFormat: "tooltipLabel",
+            tooltipFormat: "tooltipProgress"
+        });
+
+        $("#temp-slider").roundSlider({
+            svgMode: true,
+            handleShape: "round",
+            sliderType: "min-range",
+            handleSize: 60,
+            showTooltip: true,
+            editableTooltip: false,
+            min: 86,
+            max: 94,
+            step: 0.1,
+            value: $("#temp").val(),
+            startAngle: 90,
+            endAngle: 90,
+            radius: 250,
+            borderWidth: 0,
+            width: 60,
+            rangeColor: 'rgba(153, 102, 114, 1)',
+            pathColor: 'rgba(153, 102, 114, 0.4)',
+            lineCap: 'round',
+            tooltipFormat: "tooltipTemp",
             change: function(args) {
+                $("#temp").val(args.value.toString());
+                console.log(args.value);
+            }
+        });
+
+        $("#druck-slider").roundSlider({
+            svgMode: true,
+            handleShape: "round",
+            sliderType: "min-range",
+            handleSize: 60,
+            showTooltip: true,
+            editableTooltip: false,
+            min: 8,
+            max: 10,
+            step: 0.1,
+            value: $("#druck").val(),
+            startAngle: 90,
+            endAngle: 90,
+            radius: 250,
+            borderWidth: 0,
+            width: 60,
+            rangeColor: 'rgba(102, 123, 153, 1)',
+            pathColor: 'rgba(102, 123, 153, 0.4)',
+            lineCap: 'round',
+            tooltipFormat: "tooltipDruck",
+            change: function(args) {
+                $("#druck").val(args.value.toString());
+                console.log(args.value);
+            }
+        });
+
+        $("#bezug-slider").roundSlider({
+            svgMode: true,
+            handleShape: "round",
+            sliderType: "min-range",
+            handleSize: 60,
+            showTooltip: true,
+            editableTooltip: false,
+            min: 15,
+            max: 45,
+            step: 0.1,
+            value: $("#bezug").val(),
+            startAngle: 90,
+            endAngle: 90,
+            radius: 250,
+            borderWidth: 0,
+            width: 60,
+            rangeColor: 'rgba(153, 143, 102, 1)',
+            pathColor: 'rgba(153, 143, 102, 0.4)',
+            lineCap: 'round',
+            tooltipFormat: "tooltipBezug",
+            change: function(args) {
+                $("#bezug").val(args.value.toString());
+                console.log(args.value);
+            }
+        });
+
+        $("#standBy-slider").roundSlider({
+            svgMode: true,
+            handleShape: "round",
+            sliderType: "min-range",
+            handleSize: 60,
+            showTooltip: true,
+            editableTooltip: false,
+            min: 0,
+            max: 120,
+            step: 5,
+            value: $("#standBy").val(),
+            startAngle: 90,
+            endAngle: 90,
+            radius: 250,
+            borderWidth: 0,
+            width: 60,
+            rangeColor: 'rgba(122, 153, 102, 1)',
+            pathColor: 'rgba(122, 153, 102, 0.4)',
+            lineCap: 'round',
+            tooltipFormat: "tooltipStandby",
+            change: function(args) {
+                $("#standBy").val(args.value.toString());
                 console.log(args.value);
             }
         });
     });
+</script> -->
 
-    function sliderShapeChanged(e) {
-        var options = {
-            circleShape: e.value
-        };
-        if (e.value == "pie") options["startAngle"] = 0;
-        else if (e.value == "custom-quarter" || e.value == "custom-half") options["startAngle"] = 45;
-        $("#shape").roundSlider(options);
-    }
+<script>
+    $(document).ready(function() {
+
+        $('.carousel').carousel({
+            interval: false
+        })
+    });
 </script>
-
-
 <style>
-    .circle {
+    /* ************** covering full screen ************ */
+    
+    .full-page {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+    /* ************** branding logo ************ */
+    
+    #fade1 img {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        width: 400px;
+        height: 150px;
+        display: none;
+    }
+    /* ************** carousel also cover full screen ************ */
+    
+    #myCarousel-indicators {
+        width: inherit !important;
+        height: inherit !important;
     }
     
-    #shape .rs-tooltip-text {
-        color: #540e08 !important;
-        font-size: 30px;
-        font-weight: bold;
+    .carousel-inner {
+        width: inherit !important;
+        height: inherit !important;
+        /* height: 95% !important; */
+    }
+    
+    .carousel-item {
+        width: 62.5% !important;
+        height: inherit !important;
+        margin-left: 18.75% !important;
+    }
+    
+    #parameter-name {
+        font-family: 'helvetica_neueultralight';
+        font-size: 40px;
+        width: inherit;
+        height: 7.5%;
+        margin: 0px;
+    }
+    
+    .circular-slider {
+        width: inherit !important;
+        height: 62.5% !important;
+        margin-top: 5.625% !important;
+    }
+    
+    #pushed img,
+    #not-pushed img {
+        width: 62.5%;
+        height: 62.5%;
+        margin-top: 105px;
+    }
+    
+    .circle-gradient {
+        position: absolute;
+        width: 76%;
+        height: 47.5%;
+        border-radius: 50%;
+        margin-top: 165px;
+        margin-left: 7.5%;
+        /* background-color: #232932 !important; */
+        /* background: rgb(47, 55, 66); */
+        /* background: linear-gradient(1deg, rgba(47, 55, 66, 1) 100%, rgba(10, 13, 9, 1) 100%); */
+        background: linear-gradient(1.0turn, #090b0d, #2f3742);
+    }
+    
+    .progress-gradient {
+        position: absolute;
+        width: 460px;
+        height: 460px;
+        border-radius: 50%;
+        margin-top: 125px;
+        margin-left: 20px;
+        background-color: #232932 !important;
+        /* background: rgb(47, 55, 66);
+        background: linear-gradient(180deg, rgba(47, 55, 66, 1) 10%, rgba(9, 11, 13, 1) 80%); */
+        background: linear-gradient(1.0turn, #090b0d, #2f3742);
+    }
+    
+    #myCarousel-indicators ol li {
+        border-radius: 100%;
+        height: 15px;
+        width: 15px;
+    }
+    
+    .rs-tooltip-text {
+        color: rgba(216, 213, 213, 1) !important;
+        font-family: 'helvetica_neueultralight' !important;
+        font-size: 80px;
+    }
+    
+    #progress-bar .rs-handle {
+        background-color: rgba(216, 213, 213, 1) !important;
+    }
+    
+    #temp-slider .rs-handle {
+        background-color: rgba(153, 102, 114, 1) !important;
+    }
+    
+    #bezug-slider .rs-handle {
+        background-color: rgba(153, 143, 102, 1) !important;
+    }
+    
+    #druck-slider .rs-handle {
+        background-color: rgba(102, 123, 153, 1) !important;
+    }
+    
+    #standBy-slider .rs-handle {
+        background-color: rgba(122, 153, 102, 1) !important;
+    }
+    
+    #making_time {
+        color: rgba(216, 213, 213, 1) !important;
+        font-family: 'helvetica_neueultralight' !important;
+        font-size: 60px;
+        width: 100%;
+        position: absolute;
+    }
+    
+    #making_time_text {
+        color: rgba(216, 213, 213, 1) !important;
+        font-family: 'helvetica_neueultralight' !important;
+        font-size: 60px;
+        /* margin-top: 600px; */
+        margin-top: 2.5px;
+        display: flex;
+        justify-content: center;
     }
 </style>
 
