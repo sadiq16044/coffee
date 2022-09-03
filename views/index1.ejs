@@ -293,10 +293,10 @@
             change: function(args) {
                 $("#druck").val(args.value.toString());
                 console.log(args.value);
-                setTimeout(() => {
-                    $('.carousel-item.active').attr('data-touch', true)
-                    console.log($('.carousel-item.active').attr('data-touch'));
-                }, 2000);
+                // setTimeout(() => {
+                //     $('.carousel-item.active').attr('data-touch', true)
+                //     console.log($('.carousel-item.active').attr('data-touch'));
+                // }, 2000);
             },
             drag: function(args) {
                 $('.carousel-item.active').attr('data-touch', false)
