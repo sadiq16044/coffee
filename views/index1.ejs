@@ -24,6 +24,7 @@
     </div>
 
     <div id="full-page1" class="full-page" style="display: none;">
+        <!-- <div id="myCarousel-indicators" class="carousel slide" data-touch="true" data-interval="false" data-ride="carousel"> -->
         <div id="myCarousel-indicators" class="carousel slide" data-ride="carousel">
 
             <ol class="carousel-indicators">
@@ -35,7 +36,7 @@
             </ol>
 
             <div class="carousel-inner">
-                <div class="carousel-item active" data-touch="false" data-interval="false" transition: transform 2s ease, opacity 2s ease-out>
+                <div class="carousel-item active">
 
                     <div id="progress-circle">
                         <div class="progress-gradient"></div>
@@ -56,7 +57,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="carousel-item" data-touch="false" data-interval="false">
+                <div class="carousel-item">
                     <center>
                         <p id="parameter-name" style="color: rgba(153, 102, 114, 1);">Temperature</p>
                     </center>
@@ -64,7 +65,7 @@
                     <div id="temp-slider" class="circular-slider">
                     </div>
                 </div>
-                <div class="carousel-item" data-touch="false" data-interval="false">
+                <div class="carousel-item">
                     <center>
                         <p id="parameter-name" style="color: rgba(102, 123, 153, 1);">Druck</p>
                     </center>
@@ -72,7 +73,7 @@
                     <div id="druck-slider" class="circular-slider">
                     </div>
                 </div>
-                <div class="carousel-item" data-touch="false" data-interval="false">
+                <div class="carousel-item">
                     <center>
                         <p id="parameter-name" style="color: rgba(153, 143, 102, 1);">Bezugszeit</p>
                     </center>
@@ -80,7 +81,7 @@
                     <div id="bezug-slider" class="circular-slider">
                     </div>
                 </div>
-                <div class="carousel-item" data-touch="false" data-interval="false">
+                <div class="carousel-item">
                     <center>
                         <p id="parameter-name" style="color: rgba(122, 153, 102, 1);">Standby</p>
                     </center>
@@ -200,7 +201,7 @@
             }, 1000); // time of progress bar to complete 100%
         });
         $('.carousel').carousel({
-            interval: false
+            interval: false,
         })
         $("#fade1").fadeIn(5000); // removing the div after 5 secs with fading effects
         setTimeout(() => $("#fade1").fadeOut(5000), 5000)
@@ -260,6 +261,12 @@
                 //     $('.carousel-item.active').attr('data-touch', true)
                 //     console.log($('.carousel-item.active').attr('data-touch'));
                 // }, 2000);
+                $('.carousel.pointer-event').css('touch-action', 'none')
+                console.log($('.carousel.pointer-event').css('touch-action'))
+                $('.carousel').carousel({
+                    interval: true,
+                    touch: false,
+                })
             },
             drag: function(args) {
                 // $('.carousel-item.active').attr('data-touch', false)
