@@ -256,7 +256,17 @@
             change: function(args) {
                 $("#temp").val(args.value.toString());
                 console.log(args.value);
-            }
+                $('.carousel-item.active').attr('data-touch', true)
+                console.log($('.carousel-item.active').attr('data-touch'));
+            },
+            drag: function(args) {
+                $('.carousel-item.active').attr('data-touch', false)
+                console.log($('.carousel-item.active').attr('data-touch'));
+            },
+            // start: function(args) {
+            //     $('.carousel-item.active').attr('data-touch', false)
+            //     console.log($('.carousel-item.active').attr('data-touch'));
+            // }
         });
         $("#druck-slider").roundSlider({
             svgMode: true,
@@ -281,7 +291,17 @@
             change: function(args) {
                 $("#druck").val(args.value.toString());
                 console.log(args.value);
-            }
+                $('.carousel-item.active').attr('data-touch', true)
+                console.log($('.carousel-item.active').attr('data-touch'));
+            },
+            drag: function(args) {
+                $('.carousel-item.active').attr('data-touch', false)
+                console.log($('.carousel-item.active').attr('data-touch'));
+            },
+            // start: function(args) {
+            //     $('.carousel-item.active').attr('data-touch', false)
+            //     console.log($('.carousel-item.active').attr('data-touch'));
+            // }
         });
         $("#bezug-slider").roundSlider({
             svgMode: true,
