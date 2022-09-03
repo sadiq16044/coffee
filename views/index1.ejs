@@ -35,7 +35,7 @@
             </ol>
 
             <div class="carousel-inner">
-                <div class="carousel-item active" data-pause="hover" data-interval="false" transition: transform 2s ease, opacity 2s ease-out>
+                <div class="carousel-item active" data-bs-touch="false" data-interval="false" transition: transform 2s ease, opacity 2s ease-out>
 
                     <div id="progress-circle">
                         <div class="progress-gradient"></div>
@@ -56,7 +56,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="carousel-item" data-pause="hover" data-interval="false">
+                <div class="carousel-item" data-bs-touch="false" data-interval="false">
                     <center>
                         <p id="parameter-name" style="color: rgba(153, 102, 114, 1);">Temperature</p>
                     </center>
@@ -64,7 +64,7 @@
                     <div id="temp-slider" class="circular-slider">
                     </div>
                 </div>
-                <div class="carousel-item" data-pause="hover" data-interval="false">
+                <div class="carousel-item" data-bs-touch="false" data-interval="false">
                     <center>
                         <p id="parameter-name" style="color: rgba(102, 123, 153, 1);">Druck</p>
                     </center>
@@ -72,7 +72,7 @@
                     <div id="druck-slider" class="circular-slider">
                     </div>
                 </div>
-                <div class="carousel-item" data-pause="hover" data-interval="false">
+                <div class="carousel-item" data-bs-touch="false" data-interval="false">
                     <center>
                         <p id="parameter-name" style="color: rgba(153, 143, 102, 1);">Bezugszeit</p>
                     </center>
@@ -80,7 +80,7 @@
                     <div id="bezug-slider" class="circular-slider">
                     </div>
                 </div>
-                <div class="carousel-item" data-pause="hover" data-interval="false">
+                <div class="carousel-item" data-bs-touch="false" data-interval="false">
                     <center>
                         <p id="parameter-name" style="color: rgba(122, 153, 102, 1);">Standby</p>
                     </center>
@@ -257,17 +257,17 @@
                 $("#temp").val(args.value.toString());
                 console.log(args.value);
                 // setTimeout(() => {
-                //     $('.carousel-item.active').attr('data-pause', true)
-                //     console.log($('.carousel-item.active').attr('data-pause'));
+                //     $('.carousel-item.active').attr('data-bs-touch', true)
+                //     console.log($('.carousel-item.active').attr('data-bs-touch'));
                 // }, 2000);
             },
             drag: function(args) {
-                // $('.carousel-item.active').attr('data-pause', false)
-                // console.log($('.carousel-item.active').attr('data-pause'));
+                // $('.carousel-item.active').attr('data-bs-touch', false)
+                // console.log($('.carousel-item.active').attr('data-bs-touch'));
             },
             // start: function(args) {
-            //     $('.carousel-item.active').attr('data-pause', false)
-            //     console.log($('.carousel-item.active').attr('data-pause'));
+            //     $('.carousel-item.active').attr('data-bs-touch', false)
+            //     console.log($('.carousel-item.active').attr('data-bs-touch'));
             // }
         });
         $("#druck-slider").roundSlider({
@@ -294,17 +294,17 @@
                 $("#druck").val(args.value.toString());
                 console.log(args.value);
                 // setTimeout(() => {
-                //     $('.carousel-item.active').attr('data-pause', true)
-                //     console.log($('.carousel-item.active').attr('data-pause'));
+                //     $('.carousel-item.active').attr('data-bs-touch', true)
+                //     console.log($('.carousel-item.active').attr('data-bs-touch'));
                 // }, 2000);
             },
             drag: function(args) {
-                // $('.carousel-item.active').attr('data-pause', false)
-                // console.log($('.carousel-item.active').attr('data-pause'));
+                // $('.carousel-item.active').attr('data-bs-touch', false)
+                // console.log($('.carousel-item.active').attr('data-bs-touch'));
             },
             // start: function(args) {
-            //     $('.carousel-item.active').attr('data-pause', false)
-            //     console.log($('.carousel-item.active').attr('data-pause'));
+            //     $('.carousel-item.active').attr('data-bs-touch', false)
+            //     console.log($('.carousel-item.active').attr('data-bs-touch'));
             // }
         });
         $("#bezug-slider").roundSlider({
