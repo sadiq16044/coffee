@@ -13,6 +13,9 @@ const ParameterSchema = mongoose.Schema({
     },
     standBy: {
         type: Number,
+    },
+    sorting: {
+        type: Number,
     }
 });
 
