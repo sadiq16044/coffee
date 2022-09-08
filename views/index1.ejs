@@ -24,15 +24,14 @@
     </div>
 
     <div id="full-page1" class="full-page" style="display: none;">
-        <!-- <div id="myCarousel-indicators" class="carousel slide" data-touch="true" data-interval="false" data-ride="carousel"> -->
         <div id="myCarousel-indicators" class="carousel slide" data-touch="true" data-ride="carousel">
 
             <ol class="carousel-indicators">
-                <li data-target="#myCarousel-indicators" data-slide-to="0" class="active"></li>
-                <li data-target="#myCarousel-indicators" data-slide-to="1"></li>
-                <li data-target="#myCarousel-indicators" data-slide-to="2"></li>
-                <li data-target="#myCarousel-indicators" data-slide-to="3"></li>
-                <li data-target="#myCarousel-indicators" data-slide-to="4"></li>
+                <li id="slide0" data-target="#myCarousel-indicators" data-slide-to="0" class="active"></li>
+                <li id="slide1" data-target="#myCarousel-indicators" data-slide-to="1"></li>
+                <li id="slide2" data-target="#myCarousel-indicators" data-slide-to="2"></li>
+                <li id="slide3" data-target="#myCarousel-indicators" data-slide-to="3"></li>
+                <li id="slide4" data-target="#myCarousel-indicators" data-slide-to="4"></li>
             </ol>
 
             <div class="carousel-inner">
@@ -101,6 +100,7 @@
     let making_counter = 0;
     let progress_bar;
     let making_timer;
+    let valueChange = false;
 
     function tooltipTemp(args) {
         let temp = parseFloat(args.value).toFixed(1).toString().replace('.', ',');
@@ -163,6 +163,16 @@
     }
     $(document).ready(function() {
         console.log("Screeen Height: " + screen.height)
+        $('.carousel').carousel({
+            interval: false,
+        });
+        $('#myCarousel-indicators').on('slide.bs.carousel', function(event) {
+            console.log('I am sliding ' + valueChange)
+            if (valueChange) {
+                event.preventDefault();
+                valueChange = false;
+            }
+        });
         $("#start_button").click(function() {
             $.ajax({ // sending values to db
                 method: 'POST',
@@ -200,9 +210,6 @@
                 }, 500)
             }, 1000); // time of progress bar to complete 100%
         });
-        $('.carousel').carousel({
-            interval: false,
-        })
         $("#fade1").fadeIn(5000); // removing the div after 5 secs with fading effects
         setTimeout(() => $("#fade1").fadeOut(5000), 5000)
             // $("#fade1").fadeOut(5000); // removing the div after 5 secs with fading effects
@@ -257,23 +264,9 @@
             change: function(args) {
                 $("#temp").val(args.value.toString());
                 console.log(args.value);
-                // setTimeout(() => {
-                //     $('.carousel-item.active').attr('data-touch', true)
-                //     console.log($('.carousel-item.active').attr('data-touch'));
-                // }, 2000);
-                // $('#carousel').carousel(1);
             },
             drag: function(args) {
-                // $('.carousel-item.active').attr('data-touch', false)
-                // console.log($('.carousel-item.active').attr('data-touch'));
-            },
-            start: function(args) {
-                // $('.carousel-item.active').attr('data-touch', false);
-                // console.log($('.carousel-item.active').attr('data-touch'));
-
-                // $('#myCarousel-indicators').carousel(1);
-                // $("#myCarousel-indicators").addClass("avoid-clicks");
-                // console.log('removed/add')
+                valueChange = true;
             }
         });
         $("#druck-slider").roundSlider({
@@ -299,34 +292,11 @@
             change: function(args) {
                 $("#druck").val(args.value.toString());
                 console.log(args.value);
-                // setTimeout(() => {
-                //     $('.carousel-item.active').attr('data-touch', true)
-                //     console.log($('.carousel-item.active').attr('data-touch'));
-                // }, 2000);
-                // $('#myCarousel-indicators').stop();
-                // $('#myCarousel-indicators').carousel(2);
-                // $('input').focus(function() {
-                //     $("#myCarousel-indicators").carousel('pause');
-                // })
             },
-            // drag: function(args) {
-            //     // $('.carousel-item.active').attr('data-touch', false)
-            //     // console.log($('.carousel-item.active').attr('data-touch'));
-            //     console.log('outside input');
-            //     $('input').focus(function() {
-            //         console.log('inside input');
-            //         $("#myCarousel-indicators").carousel('pause');
-            //     })
-
-            // },
-            // start: function(args) {
-            //     $('.carousel-item.active').attr('data-touch', false)
-            //     console.log($('.carousel-item.active').attr('data-touch'));
-            // }
+            drag: function(args) {
+                valueChange = true;
+            }
         });
-        // $('#myCarousel-indicators').on('slide.bs.carousel', function() {
-        //     console.log('I am sliding')
-        // })
         $("#bezug-slider").roundSlider({
             svgMode: true,
             handleShape: "round",
@@ -350,6 +320,9 @@
             change: function(args) {
                 $("#bezug").val(args.value.toString());
                 console.log(args.value);
+            },
+            drag: function(args) {
+                valueChange = true;
             }
         });
         $("#standBy-slider").roundSlider({
@@ -375,6 +348,9 @@
             change: function(args) {
                 $("#standBy").val(args.value.toString());
                 console.log(args.value);
+            },
+            drag: function(args) {
+                valueChange = true;
             }
         });
     });
