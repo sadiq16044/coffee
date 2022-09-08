@@ -25,7 +25,7 @@
 
     <div id="full-page1" class="full-page" style="display: none;">
         <!-- <div id="myCarousel-indicators" class="carousel slide" data-touch="true" data-interval="false" data-ride="carousel"> -->
-        <div id="myCarousel-indicators" class="carousel slide" data-ride="carousel">
+        <div id="myCarousel-indicators" class="carousel slide" data-touch="true" data-ride="carousel">
 
             <ol class="carousel-indicators">
                 <li data-target="#myCarousel-indicators" data-slide-to="0" class="active"></li>
@@ -208,8 +208,8 @@
             // $("#fade1").fadeOut(5000); // removing the div after 5 secs with fading effects
         setTimeout(function() {
             $('#full-page1').fadeIn(1000); // showing the carousel slides
-            progress_bar = setInterval(progressBar, 60);
-        }, 1000); // branding logo 10 seconds delay
+            progress_bar = setInterval(progressBar, 600);
+        }, 10000); // branding logo 10 seconds delay
 
         $.fn.roundSlider.prototype._handleDragDistance = 90;
         $("#progress-bar").roundSlider({
@@ -261,21 +261,20 @@
                 //     $('.carousel-item.active').attr('data-touch', true)
                 //     console.log($('.carousel-item.active').attr('data-touch'));
                 // }, 2000);
-                $('.carousel.pointer-event').css('touch-action', 'none')
-                console.log($('.carousel.pointer-event').css('touch-action'))
-                $('.carousel').carousel({
-                    interval: true,
-                    touch: false,
-                })
+                // $('#carousel').carousel(1);
             },
             drag: function(args) {
                 // $('.carousel-item.active').attr('data-touch', false)
                 // console.log($('.carousel-item.active').attr('data-touch'));
             },
-            // start: function(args) {
-            //     $('.carousel-item.active').attr('data-touch', false)
-            //     console.log($('.carousel-item.active').attr('data-touch'));
-            // }
+            start: function(args) {
+                // $('.carousel-item.active').attr('data-touch', false);
+                // console.log($('.carousel-item.active').attr('data-touch'));
+
+                // $('#myCarousel-indicators').carousel(1);
+                // $("#myCarousel-indicators").addClass("avoid-clicks");
+                // console.log('removed/add')
+            }
         });
         $("#druck-slider").roundSlider({
             svgMode: true,
@@ -304,16 +303,30 @@
                 //     $('.carousel-item.active').attr('data-touch', true)
                 //     console.log($('.carousel-item.active').attr('data-touch'));
                 // }, 2000);
+                // $('#myCarousel-indicators').stop();
+                // $('#myCarousel-indicators').carousel(2);
+                // $('input').focus(function() {
+                //     $("#myCarousel-indicators").carousel('pause');
+                // })
             },
-            drag: function(args) {
-                // $('.carousel-item.active').attr('data-touch', false)
-                // console.log($('.carousel-item.active').attr('data-touch'));
-            },
+            // drag: function(args) {
+            //     // $('.carousel-item.active').attr('data-touch', false)
+            //     // console.log($('.carousel-item.active').attr('data-touch'));
+            //     console.log('outside input');
+            //     $('input').focus(function() {
+            //         console.log('inside input');
+            //         $("#myCarousel-indicators").carousel('pause');
+            //     })
+
+            // },
             // start: function(args) {
             //     $('.carousel-item.active').attr('data-touch', false)
             //     console.log($('.carousel-item.active').attr('data-touch'));
             // }
         });
+        // $('#myCarousel-indicators').on('slide.bs.carousel', function() {
+        //     console.log('I am sliding')
+        // })
         $("#bezug-slider").roundSlider({
             svgMode: true,
             handleShape: "round",
@@ -368,6 +381,10 @@
 </script>
 
 <style>
+    .avoid-clicks {
+        pointer-events: none !important;
+    }
+    
     .fade-page {
         position: absolute;
         top: 50%;
