@@ -7,9 +7,11 @@
     <link href="/js/roundslider.min.css" rel="stylesheet" />
     <script src="/js/roundslider.min.js"></script>
     <link href="/fonts/fonts.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="/css/bootstrap/bootstrap.css">
+    <!-- <link rel="stylesheet" href="/css/bootstrap/bootstrap-reboot.css"> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script> -->
+    <script src="/js/bootstrap.min.js"></script>
 </head>
 
 <body style="background-color: black;">
@@ -96,6 +98,19 @@
 </body>
 
 <script>
+    ////////////////////////////////////// sse setup //////////////////////////////////////////////////
+    const es = new EventSource("http://localhost:3003/stream");
+
+    es.addEventListener('data', function(event) {
+        console.log('Message from event stream');
+        console.log(JSON.parse(event.data));
+        let data = JSON.parse(event.data);
+        let response = data.response;
+        if (data.action) {
+            received_response(response.order, response.value);
+        }
+    });
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
     let progress_counter = 0;
     let making_counter = 0;
     let progress_bar;
@@ -161,6 +176,115 @@
             }, 4000); // time of progress bar to complete 100%
         }
     }
+
+    ////////////////////////////////////////////// Functions for Serial ////////////////////////////////////////////////
+
+    let Order = {
+        HELLO: 0,
+        ALREADY_CONNECTED: 1,
+        ERROR: 2,
+        RECEIVED: 3,
+        TEMPERATURE: 4,
+        PRESSURE: 5,
+        TIME: 6,
+        START: 7,
+        STOP: 8,
+        SHUTDOWN: 9,
+        STARTED: 10,
+        TEMPERATURE2: 11,
+        HEATING: 12,
+        ONSTATE: 13,
+        STANDBY: 14
+    };
+    let abortWork = false;
+    let startFlag = false;
+    let stopFlag = false;
+    let noStop = false;
+    let onState = 1;
+    let errorNumber = 0;
+    let parametersWrite = false;
+    let onstate = 0;
+    let heated = 0;
+    let showCoffeeFlag = true;
+    let update_ready = true;
+
+    function received_response(order, value) {
+
+        switch (order) {
+            case Order.ERROR:
+                errorNumber = value;
+                break;
+            case Order.HEATING:
+                heated = value;
+                break;
+            case Order.ONSTATE:
+                onstate = value;
+                break;
+        }
+
+    }
+
+    async function send(order, value, msg) {
+
+        let sendText;
+        if (msg != '') { // msg written
+            sendText = `${order}<${msg}>`;
+        } else if (value == -1) { // value written
+            sendText = `${order}<0>`;
+        } else { // only send order
+            sendText = `${order}<${parseInt(value)}>`;
+        }
+        console.log('send');
+        data = {
+            sendText: sendText,
+            parametersUpdate: parametersWrite,
+            parameters: {
+                temperature: $("#temp").val(),
+                druck: $("#druck").val(),
+                bezugszeit: $("#bezug").val(),
+                standBy: $("#standBy").val(),
+            }
+        }
+
+        $.ajax({
+                url: "http://localhost:3003/send",
+                method: "POST",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json'
+            })
+            .done(function(msg) {
+                console.log(msg)
+            });
+    }
+
+    async function start() {
+
+        console.log("START");
+        startFlag = true;
+        abortWork = false;
+        stopFlag = false;
+        parametersWrite = true; // to update the parameters in disk file
+        await send(Order.START, -1, ''); // sending to start to make coffee
+        parametersWrite = false;
+        // eel.order_start();
+        //store values on disk
+        // eel.store_temperature(document.getElementById("demo_select1").selectedIndex);
+        // eel.store_pressure(document.getElementById("demo_select2").selectedIndex);
+        // eel.store_time(document.getElementById("demo_select3").selectedIndex);
+    }
+
+    async function stop() {
+        //showCoffee();
+        stopFlag = true;
+        abortWork = true;
+        startFlag = false;
+        // eel.order_stop();
+        await send(Order.STOP, -1, ''); // sending to start to make coffee
+
+    }
+
+
     $(document).ready(function() {
         console.log("Screeen Height: " + screen.height)
         $('.carousel').carousel({
@@ -173,7 +297,8 @@
                 valueChange = false;
             }
         });
-        $("#start_button").click(function() {
+        $("#start_button").click(async function() {
+
             $.ajax({ // sending values to db
                 method: 'POST',
                 url: '/update-parameters',
@@ -196,20 +321,28 @@
                 making_timer = setInterval(makingTime, 100);
             }, 500)
 
-        });
-        $("#stop_button").click(function() {
-            setTimeout(function() { // things to do after 9 minutes progress bar
+            await start(); // calling to send starting commands
 
-                clearInterval(making_timer);
-                making_counter = 0;
-                $('#pushed').fadeOut(500); // fadeout the after pushed button
-                $('#making_time').fadeOut(500); // fadeout the after pushed button
-                setTimeout(() => {
-                    $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
-                    $('.carousel-indicators').fadeIn(1000); // showing the carousel
-                }, 500)
-            }, 1000); // time of progress bar to complete 100%
         });
+        $("#stop_button").click(async function() {
+
+            if (!abortWork) {
+                setTimeout(function() { // things to do after 9 minutes progress bar
+
+                    clearInterval(making_timer);
+                    making_counter = 0;
+                    $('#pushed').fadeOut(500); // fadeout the after pushed button
+                    $('#making_time').fadeOut(500); // fadeout the after pushed button
+                    setTimeout(() => {
+                        $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
+                        $('.carousel-indicators').fadeIn(1000); // showing the carousel
+                    }, 500)
+                }, 1000); // time of progress bar to complete 100%
+
+                await stop();
+            }
+        });
+
         $("#fade1").fadeIn(5000); // removing the div after 5 secs with fading effects
         setTimeout(() => $("#fade1").fadeOut(5000), 5000)
             // $("#fade1").fadeOut(5000); // removing the div after 5 secs with fading effects
@@ -263,6 +396,11 @@
             tooltipFormat: "tooltipTemp",
             change: function(args) {
                 $("#temp").val(args.value.toString());
+                update_ready = true;
+                if (heated == 1 && onstate == 1) {
+                    send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10), '');
+                    update_ready = false;
+                }
                 console.log(args.value);
             },
             drag: function(args) {
@@ -291,6 +429,11 @@
             tooltipFormat: "tooltipDruck",
             change: function(args) {
                 $("#druck").val(args.value.toString());
+                update_ready = true;
+                if (heated == 1 && onstate == 1) {
+                    send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10), '');
+                    update_ready = false;
+                }
                 console.log(args.value);
             },
             drag: function(args) {
@@ -319,6 +462,11 @@
             tooltipFormat: "tooltipBezug",
             change: function(args) {
                 $("#bezug").val(args.value.toString());
+                update_ready = true;
+                if (heated == 1 && onstate == 1) {
+                    send(Order.TIME, (parseFloat($("#bezug").val()) * 10), '');
+                    update_ready = false;
+                }
                 console.log(args.value);
             },
             drag: function(args) {
@@ -347,12 +495,68 @@
             tooltipFormat: "tooltipStandby",
             change: function(args) {
                 $("#standBy").val(args.value.toString());
+                update_ready = true;
+                if (heated == 1 && onstate == 1) {
+                    send(Order.STANDBY, (parseFloat($("#standBy").val())), '');
+                    update_ready = false;
+                }
                 console.log(args.value);
             },
             drag: function(args) {
                 valueChange = true;
             }
         });
+
+        let polling = setInterval(async function() { // it will tell take the response of coffee machine is on and heated in timely basis
+            // heated = 1;
+            // onstate = 1;
+            if (heated == 1 && onstate == 1) { //&& polling_allowed == 1
+
+                if (onstate == 1) {
+                    // eel.order_polling(); //modifies errorNumber via python
+                    // eel.order_onstate(0);
+                    // eel.order_error(0);
+
+                    // await send(Order.ONSTATE, 0, ''); // sending to get the state of coffee machine
+                    // await send(Order.ERROR, 0, ''); // sending to get if there is an error in coffee machine
+                }
+
+                setTimeout(function() {
+                    if (errorNumber > 1) {
+                        // document.getElementById("errorblocker").style.visibility = "visible";
+                        // document.getElementById("errorNumber").style.visibility = "visible";
+                        // document.getElementById("fill").style.visibility = "hidden";
+                        // document.getElementById("errorNumber").innerHTML = "Error #" + errorNumber;
+                        // console.log("error");
+                    } else if (errorNumber == 1 && showCoffeeFlag) {
+                        // document.getElementById("fill").style.visibility = "visible";
+                        //document.getElementById("temp1").innerHTML = "Temperatur 1: "+(temperature1/10).toFixed(1) + " °C";
+                        //document.getElementById("temp2").innerHTML = "Temperatur 2: "+(temperature2/10).toFixed(1) + " °C";
+                        //document.getElementById("pressure").innerHTML = "Druck: "+(pressure/10).toFixed(1) + " bar";
+                    } else {
+                        // document.getElementById("errorblocker").style.visibility = "hidden";
+                        // document.getElementById("errorNumber").style.visibility = "hidden";
+                        // document.getElementById("fill").style.visibility = "hidden";
+                        //document.getElementById("temp1").innerHTML = "Temperatur 1: "+(temperature1/10).toFixed(1) + " °C";
+                        //document.getElementById("temp2").innerHTML = "Temperatur 2: "+(temperature2/10).toFixed(1) + " °C";
+                        //document.getElementById("pressure").innerHTML = "Druck: "+(pressure/10).toFixed(1) + " bar";
+                    }
+
+                    if (update_ready) {
+                        send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10), '');
+                        send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10), '');
+                        send(Order.TIME, (parseFloat($("#bezug").val()) * 10), '');
+                        send(Order.STANDBY, (parseFloat($("#standBy").val())), '');
+                        update_ready = false;
+                    }
+                }, 200);
+            } else {
+                // eel.order_polling(); // it is just for noting what's on serial
+                // eel.order_onstate(0);
+                send(Order.ONSTATE, 0, ''); // sending get the state of coffee machine
+            }
+
+        }, 5000);
     });
 </script>
 
