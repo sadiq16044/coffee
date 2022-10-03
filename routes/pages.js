@@ -2,6 +2,8 @@ const express = require('express');
 const SSE = require('express-sse');
 const router = express.Router();
 const fs = require('fs');
+const utf8 = require('utf8');
+const Buffer = require('buffer/').Buffer;
 
 
 ///////////////////////////////// sse setup //////////////////////////////////////
@@ -68,7 +70,8 @@ async function open_serialPort() {
                 let lookFor2 = "silicon laboratories";
                 searchString = searchString.toLowerCase();
 
-                if (searchString.indexOf(lookFor) >= 0 || searchString.indexOf(lookFor1) >= 0 || searchString.indexOf(lookFor2) >= 0) {
+                // if (searchString.indexOf(lookFor) >= 0 || searchString.indexOf(lookFor1) >= 0 || searchString.indexOf(lookFor2) >= 0) {
+                if (searchString.indexOf(lookFor2) >= 0) {
                     portName = port.comName;
                     console.log("Found Arduino on Com Port: " + port.path);
                     comPort = port.path;
@@ -119,6 +122,7 @@ async function open_serialPort() {
                     }
 
                     console.log('got word from arduino:', msg_receive);
+                    // console.log('got word from arduino:', data.toString());
                     // console.log('Data:', data.toString('utf8'));
                     if (connected_Arduino) { // && !acknowledge
 
@@ -176,9 +180,16 @@ async function open_serialPort() {
 let connected_Arduino = false;
 let acknowledge = false;
 
+const buf = Buffer.from('6<600>', 'utf8');
+console.log(buf);
+
 function connecting_to_arduino() {
 
-    port.write(`${Order.HELLO}<0>`, (err) => { // sending hello to make handshake connection
+    let test1 = "7<700>";
+    let utf_test1 = Buffer.from(test1, 'utf8');  
+    // console.log(utf_test1);
+    // port.write(`${Order.HELLO}<0>`, (err) => { // sending hello to make handshake connection
+    port.write(test1, (err) => { // sending hello to make handshake connection
         if (err) {
             return console.log('Error on write: ', err.message);
         }
