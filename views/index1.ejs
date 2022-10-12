@@ -108,8 +108,11 @@
         let response = data.response;
         if (data.action) {
             received_response(response.order, response.value);
+        } else if (data.msg == 'connected') {
+            update_ready = true;
         }
     });
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     let progress_counter = 0;
     let making_counter = 0;
@@ -165,15 +168,17 @@
         if (making_counter >= parseInt($("#bezug").val() * 10)) { // stopping progress bar increment value
             // if (making_counter <= 0) { // stopping progress bar increment value
             clearInterval(making_timer);
-            setTimeout(function() { // things to do after 9 minutes progress bar
+            setTimeout(function() {
                 $('#pushed').fadeOut(500); // fadeout the after pushed button
                 $('#making_time').fadeOut(500); // fadeout the after pushed button
                 making_counter = 0;
+                update_ready = true; // to send data if it changes during making coffee
+                startFlag = false; // coffee making completed
                 setTimeout(() => {
                     $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
                     $('.carousel-indicators').fadeIn(1000); // showing the carousel
                 }, 500)
-            }, 4000); // time of progress bar to complete 100%
+            }, 4000);
         }
     }
 
@@ -194,8 +199,10 @@
         TEMPERATURE2: 11,
         HEATING: 12,
         ONSTATE: 13,
-        STANDBY: 14
+        STANDBY: 14,
+        PING: 15
     };
+
     let abortWork = false;
     let startFlag = false;
     let stopFlag = false;
@@ -220,26 +227,19 @@
             case Order.ONSTATE:
                 onState = value;
                 if (onState == 1 && prev_onState != onState) {
-                    $('#full-page1').fadeIn(1000); // showing the body content
+                    $('#full-page1').fadeIn(500); // showing the body content
                 } else if (onState == 0 && prev_onState != onState) {
-                    $('#full-page1').fadeOut(1000); // hiding the body content
+                    $('#full-page1').fadeOut(500); // hiding the body content
                 }
                 prev_onState = onState;
                 break;
         }
-        update_ready = true;
     }
 
-    async function send(order, value, msg) {
+    async function send(order, value) {
 
         let sendText;
-        if (msg != '') { // msg written
-            sendText = `${order}<${msg}>`;
-        } else if (value == -1) { // value written
-            sendText = `${order}<0>`;
-        } else { // only send order
-            sendText = `${order}<${parseInt(value)}>`;
-        }
+        sendText = `${order}<${parseInt(value)}>`;
         console.log('send');
         data = {
             sendText: sendText,
@@ -271,13 +271,8 @@
         abortWork = false;
         stopFlag = false;
         parametersWrite = true; // to update the parameters in disk file
-        await send(Order.START, -1, ''); // sending to start to make coffee
+        await send(Order.START, 0); // sending to start to make coffee
         parametersWrite = false;
-        // eel.order_start();
-        //store values on disk
-        // eel.store_temperature(document.getElementById("demo_select1").selectedIndex);
-        // eel.store_pressure(document.getElementById("demo_select2").selectedIndex);
-        // eel.store_time(document.getElementById("demo_select3").selectedIndex);
     }
 
     async function stop() {
@@ -286,7 +281,7 @@
         abortWork = true;
         startFlag = false;
         // eel.order_stop();
-        await send(Order.STOP, -1, ''); // sending to start to make coffee
+        await send(Order.STOP, 0); // sending to start to make coffee
 
     }
 
@@ -305,47 +300,51 @@
         });
         $("#start_button").click(async function() {
 
-            $.ajax({ // sending values to db
-                method: 'POST',
-                url: '/update-parameters',
-                dataType: 'json',
-                data: {
-                    temperature: $("#temp").val(),
-                    druck: $("#druck").val(),
-                    bezugszeit: $("#bezug").val(),
-                    standBy: $("#standBy").val(),
-                }
-            }).done(function(result) {
-                console.log(result)
-            });
+            // $.ajax({ // sending values to db
+            //     method: 'POST',
+            //     url: '/update-parameters',
+            //     dataType: 'json',
+            //     data: {
+            //         temperature: $("#temp").val(),
+            //         druck: $("#druck").val(),
+            //         bezugszeit: $("#bezug").val(),
+            //         standBy: $("#standBy").val(),
+            //     }
+            // }).done(function(result) {
+            //     console.log(result)
+            // });
+
 
             $('#not-pushed').fadeOut(500); // fadeout the before pushed button
             $('.carousel-indicators').fadeOut(500); // showing the carousel
-            setTimeout(() => {
-                $('#making_time').fadeIn(1000);
-                $('#pushed').fadeIn(1000); // fadeIn the after pushed button
+            setTimeout(() => { // showing stop button
+                making_counter = 0;
+                $("#making_time_text").text(parseFloat(making_counter * 0.1).toFixed(1).toString().replace('.', ','));
+                $('#making_time').fadeIn(500);
+                $('#pushed').fadeIn(500); // fadeIn the after pushed button
+            }, 500);
+            setTimeout(async() => { // starting timer of making coffee
+                await start(); // calling to send starting commands
                 making_timer = setInterval(makingTime, 100);
-            }, 500)
-
-            await start(); // calling to send starting commands
+            }, 1000);
 
         });
         $("#stop_button").click(async function() {
 
             if (!abortWork) {
-                setTimeout(function() { // things to do after 9 minutes progress bar
-
-                    clearInterval(making_timer);
-                    making_counter = 0;
-                    $('#pushed').fadeOut(500); // fadeout the after pushed button
-                    $('#making_time').fadeOut(500); // fadeout the after pushed button
-                    setTimeout(() => {
-                        $('#not-pushed').fadeIn(1000); // fadeIn the before pushed button
-                        $('.carousel-indicators').fadeIn(1000); // showing the carousel
-                    }, 500)
-                }, 1000); // time of progress bar to complete 100%
-
                 await stop();
+                // setTimeout(function() { // things to do after 9 minutes progress bar
+                // }, 1000); // time of progress bar to complete 100%
+
+                clearInterval(making_timer);
+                making_counter = 0;
+                $('#pushed').fadeOut(500); // fadeout the after pushed button
+                $('#making_time').fadeOut(500); // fadeout the after pushed button
+                setTimeout(() => {
+                    update_ready = true; // to send data if data changes before the coffee making stops 
+                    $('#not-pushed').fadeIn(500); // fadeIn the before pushed button
+                    $('.carousel-indicators').fadeIn(500); // showing the carousel
+                }, 500)
             }
         });
 
@@ -404,8 +403,8 @@
             change: function(args) {
                 $("#temp").val(args.value.toString());
                 update_ready = true;
-                if (heated == 1 && onState == 1) {
-                    send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10), '');
+                if (heated == 1 && onState == 1 && !startFlag) {
+                    send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10));
                     update_ready = false;
                 }
                 console.log(args.value);
@@ -437,8 +436,8 @@
             change: function(args) {
                 $("#druck").val(args.value.toString());
                 update_ready = true;
-                if (heated == 1 && onState == 1) {
-                    send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10), '');
+                if (heated == 1 && onState == 1 && !startFlag) {
+                    send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10));
                     update_ready = false;
                 }
                 console.log(args.value);
@@ -470,8 +469,8 @@
             change: function(args) {
                 $("#bezug").val(args.value.toString());
                 update_ready = true;
-                if (heated == 1 && onState == 1) {
-                    send(Order.TIME, (parseFloat($("#bezug").val()) * 10), '');
+                if (heated == 1 && onState == 1 && !startFlag) {
+                    send(Order.TIME, (parseFloat($("#bezug").val()) * 10));
                     update_ready = false;
                 }
                 console.log(args.value);
@@ -503,8 +502,8 @@
             change: function(args) {
                 $("#standBy").val(args.value.toString());
                 update_ready = true;
-                if (heated == 1 && onState == 1) {
-                    send(Order.STANDBY, (parseFloat($("#standBy").val())), '');
+                if (heated == 1 && onState == 1 && !startFlag) {
+                    send(Order.STANDBY, (parseFloat($("#standBy").val())));
                     update_ready = false;
                 }
                 console.log(args.value);
@@ -515,18 +514,14 @@
         });
 
         let polling = setInterval(async function() { // it will tell take the response of coffee machine is on and heated in timely basis
-            // heated = 1;
+            heated = 1;
             // onState = 1;
             if (heated == 1 && onState == 1) { //&& polling_allowed == 1
 
                 if (onState == 1) {
-                    // eel.order_polling(); //modifies errorNumber via python
-                    // eel.order_onstate(0);
-                    // eel.order_error(0);
-
-                    // await send(Order.ONSTATE, 0, ''); // sending to get the state of coffee machine
-                    // await send(Order.ERROR, 0, ''); // sending to get if there is an error in coffee machine
-                    // await send(Order.HEATING, 0, ''); // sending to get if there is an error in coffee machine
+                    await send(Order.ONSTATE, 0); // sending to get the state of coffee machine
+                    // await send(Order.ERROR, 0); // sending to get if there is an error in coffee machine
+                    // await send(Order.HEATING, 0); // sending to get if there is an error in coffee machine
 
                 }
 
@@ -551,19 +546,17 @@
                         //document.getElementById("pressure").innerHTML = "Druck: "+(pressure/10).toFixed(1) + " bar";
                     }
 
-                    if (update_ready) {
-                        send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10), '');
-                        send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10), '');
-                        send(Order.TIME, (parseFloat($("#bezug").val()) * 10), '');
-                        send(Order.STANDBY, (parseFloat($("#standBy").val())), '');
+                    if (update_ready && !startFlag) {
+                        send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10));
+                        send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10));
+                        send(Order.TIME, (parseFloat($("#bezug").val()) * 10));
+                        send(Order.STANDBY, (parseFloat($("#standBy").val())));
                         update_ready = false;
                     }
                 }, 200);
             } else {
-                // eel.order_polling(); // it is just for noting what's on serial
-                // eel.order_onstate(0);
-                await send(Order.ONSTATE, 0, ''); // sending get the state of coffee machine
-                await send(Order.HEATING, 0, ''); // sending get the state of coffee machine
+                await send(Order.ONSTATE, 0); // sending get the state of coffee machine
+                // await send(Order.HEATING, 0); // sending get the state of coffee machine
             }
 
         }, 5000);

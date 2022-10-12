@@ -11,7 +11,7 @@ var sse = new SSE();
 router.get('/stream', sse.init);
 //////////////////////////////////////////////////////////////////////////////////
 // Get parameter model
-const Parameter = require('../models/parameter');
+// const Parameter = require('../models/parameter');
 
 const { SerialPort } = require('serialport')
 const { DelimiterParser } = require('@serialport/parser-delimiter')
@@ -32,8 +32,6 @@ const { json } = require('body-parser');
 // SerialPort.list()
 // .then (data => console.log(data))
 let port;
-let comPort;
-let foundArduino = false;
 let parser;
 
 let Order = {
@@ -51,7 +49,8 @@ let Order = {
     TEMPERATURE2: 11,
     HEATING: 12,
     ONSTATE: 13,
-    STANDBY: 14
+    STANDBY: 14,
+    PING: 15
 };
 
 async function open_serialPort() {
@@ -60,135 +59,132 @@ async function open_serialPort() {
         .then(function (ports) {
             console.log(ports)
             ports.forEach(function (port) {
-                // console.log("PORT NAME: " + port.path);
+                console.log("PORT NAME: " + port.path);
                 // console.log("PORT ID: " + port.pnpId);
                 // console.log("PORT MANUFACTURER: " + port.manufacturer);
 
-                let searchString = port.manufacturer;
-                let lookFor = "wch.cn";
-                let lookFor1 = "arduino";
-                let lookFor2 = "silicon laboratories";
-                searchString = searchString.toLowerCase();
+                // let searchString = port.manufacturer;
+                // let lookFor = "wch.cn";
+                // let lookFor1 = "arduino";
+                // let lookFor2 = "silicon laboratories";
+                // searchString = searchString.toLowerCase();
 
-                // if (searchString.indexOf(lookFor) >= 0 || searchString.indexOf(lookFor1) >= 0 || searchString.indexOf(lookFor2) >= 0) {
-                if (searchString.indexOf(lookFor2) >= 0) {
-                    portName = port.comName;
-                    console.log("Found Arduino on Com Port: " + port.path);
-                    comPort = port.path;
-                    foundArduino = true;
-                }
             })
         })
         .then(function () {
-            // console.log(foundArduino);
-            // comport for windows is COM0, COM1 .....
-            // comport for windows rPi is either /dev/ttyACM0 ... or /dev/ttyUSB0 .....
-            if (foundArduino) {
-
-                port = new SerialPort({
-                    path: comPort,
-                    baudRate: 115200,
-                    dataBits: 8,
-                    stopBits: 1,
-                    parity: 'none',
-                });
-                parser = port.pipe(new DelimiterParser({ delimiter: '>' })) // Read the port data
-                port.on("error", (err) => {
-                    foundArduino = false;
-                    setTimeout(() => {
-                        open_serialPort();
-                    }, 1000)
-                    console.log(err);
-                });
-                port.on("close", () => {
-                    foundArduino = false;
-                    setTimeout(() => {
-                        open_serialPort();
-                    }, 1000)
-                    console.log('port closed');
-                });
-                port.on("open", () => {
-                    console.log('serial port open');
-                    connecting_to_arduino();
-                });
-                parser.on('data', data => {
-                    // console.log('in parser.on')
-                    prev_msg_receive.order = msg_receive.order; // saving previous received order
-                    prev_msg_receive.value = msg_receive.value; // saving previous received value
-                    let seperator_index = data.toString().indexOf("<"); // order and value seperator from string
-                    if (seperator_index != -1) {
-                        msg_receive.order = parseInt(data.toString().substring(0, seperator_index));
-                        msg_receive.value = parseInt(data.toString().substring(seperator_index + 1, data.toString().length));
-                    }
-
-                    console.log('got word from arduino:', msg_receive);
-                    // console.log('got word from arduino:', data.toString());
-                    // console.log('Data:', data.toString('utf8'));
-                    if (connected_Arduino) { // && !acknowledge
-
-                        if (msg_receive.order == Order.RECEIVED) {
-
-                            console.log("Received Arduino acknowledgement");
-                            acknowledge = true; // acknowledged by arduino
-                            if (msg_receive.order !== prev_msg_receive.order) { // means arduino some data to act on
-                                
-                                let content = {
-                                    msg: "Response from Arduino",
-                                    action: true,
-                                    response: prev_msg_receive,
-                                }
-                                sse.send(content, 'data');
-
-                            } else {
-                                
-                                let content = {
-                                    msg: "Response from Arduino",
-                                    action: false,
-                                    response: prev_msg_receive,
-                                }
-                                sse.send(content, 'data');
-
-                            }
-                        } 
-
-                    } else { // sending handshaking request to arduino
-
-                        if (msg_receive.order == Order.HELLO || msg_receive.order == Order.ALREADY_CONNECTED) {
-                            console.log("Handshake accepted!")
-                            connected_Arduino = true;
-                            let content = {
-                                msg: "connected to arduino",
-                            }
-                            sse.send(content, 'data');
-                        } else {
-                            console.log("Not getting arduino response..."); // means connection not established
-                            connecting_to_arduino(); // sending handshake request again
-                        }
-
-                    }
-                });
-            } else {
-                console.log('Not found arduino...')
-                foundArduino = false;
+            
+            port = new SerialPort({
+                path: '/dev/ttyS0',
+                baudRate: 115200,
+                dataBits: 8,
+                stopBits: 1,
+                parity: 'none',
+            });
+            parser = port.pipe(new DelimiterParser({ delimiter: '>' })) // Read the port data
+            port.on("error", (err) => {
+                connected_Arduino = false;
                 setTimeout(() => {
                     open_serialPort();
                 }, 1000)
-            }
+                console.log(err);
+            });
+            port.on("close", () => {
+                connected_Arduino = false;
+                setTimeout(() => {
+                    open_serialPort();
+                }, 1000)
+                console.log('port closed');
+            });
+            port.on("open", () => {
+                console.log('serial port open');
+                connecting_to_arduino();
+            });
+            parser.on('data', data => {
+                // console.log('in parser.on')
+                prev_msg_receive.order = msg_receive.order; // saving previous received order
+                prev_msg_receive.value = msg_receive.value; // saving previous received value
+                let seperator_index = data.toString().indexOf("<"); // order and value seperator from string
+                if (seperator_index != -1) {
+                    msg_receive.order = parseInt(data.toString().substring(0, seperator_index));
+                    msg_receive.value = parseInt(data.toString().substring(seperator_index + 1, data.toString().length));
+                }
+
+                console.log('got word from arduino:', msg_receive);
+                // console.log('got word from arduino:', data.toString());
+                // console.log('Data:', data.toString('utf8'));
+                if (connected_Arduino) { 
+
+                    if (msg_receive.order == Order.RECEIVED) {
+
+                        console.log("Received Arduino acknowledgement");
+                        if (msg_receive.order !== prev_msg_receive.order) { // means arduino some data to act on
+
+                            let content = {
+                                msg: "Response from Arduino",
+                                action: true,
+                                response: prev_msg_receive,
+                            }
+                            sse.send(content, 'data');
+
+                        } else {
+
+                            let content = {
+                                msg: "Response from Arduino",
+                                action: false,
+                                response: prev_msg_receive,
+                            }
+                            sse.send(content, 'data');
+
+                        }
+                    } else if (msg_receive.order == Order.PING) {
+
+                        port.write("0<0>", (err) => { // sending hello to make handshake connection again if lost
+                            if (err) {
+                                return console.log('Error on write: ', err.message);
+                            }
+                            console.log('Sending connection making request again!');
+                        });
+                    } else if (msg_receive.order == Order.HELLO || msg_receive.order == Order.ALREADY_CONNECTED) {
+
+                        console.log("Connection build again!");
+                        let content = {
+                            msg: "connected",
+                            action: false,
+                            response: '',
+                        }
+                        sse.send(content, 'data');
+                        
+                    }
+
+                } else { // sending handshaking request to arduino
+
+                    if (msg_receive.order == Order.HELLO || msg_receive.order == Order.ALREADY_CONNECTED) {
+                        console.log("Handshake accepted!");
+                        connected_Arduino = true;
+                        let content = {
+                            msg: "connected",
+                            action: false,
+                            response: '',
+                        }
+                        sse.send(content, 'data');
+                    } else {
+                        console.log("Not getting arduino response..."); // means connection not established
+                        connecting_to_arduino(); // sending handshake request again
+                    }
+
+                }
+            });
         });
 }
 
 let connected_Arduino = false;
-let acknowledge = false;
 
-const buf = Buffer.from('6<600>', 'utf8');
-console.log(buf);
+// const buf = Buffer.from('6<600>', 'utf8');
+// console.log(buf);
 
 function connecting_to_arduino() {
 
-    let test1 = "7<700>";
-    let utf_test1 = Buffer.from(test1, 'utf8');  
-    // console.log(utf_test1);
-    // port.write(`${Order.HELLO}<0>`, (err) => { // sending hello to make handshake connection
+    let test1 = "0<0>";
     port.write(test1, (err) => { // sending hello to make handshake connection
         if (err) {
             return console.log('Error on write: ', err.message);
@@ -197,11 +193,6 @@ function connecting_to_arduino() {
     });
 
 }
-
-// open_serialPort(); // opening the port on which arduino is connected
-// setTimeout(function () {
-//     connecting_to_arduino();
-// }, 1000);
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -231,46 +222,6 @@ router.get('/', async (req, res) => {
     })
 });
 
-/*
- * Get /parameter-values (Current Parameters)
- */
-router.get('/parameter-values', (req, res) => {
-
-    // Parameter.findOne({ sorting: 100 }, function (err, parameters) {
-    //     if (err) console.log(err);
-
-    //     res.send(parameters);
-    // });
-});
-
-/*
- * post /update-parameters (Home page)
- */
-router.post('/update-parameters', (req, res) => {
-
-    // let temperature = parseFloat(req.body.temperature).toFixed(1);
-    // let druck = parseFloat(req.body.druck).toFixed(1);
-    // let bezugszeit = parseFloat(req.body.bezugszeit).toFixed(1);
-    // let standBy = parseInt(req.body.standBy);
-
-    // Parameter.findOne({ sorting: 100 }, function (err, parameters) {
-    //     if (err) console.log(err);
-
-    //     parameters.temperature = temperature;
-    //     parameters.druck = druck;
-    //     parameters.bezugszeit = bezugszeit;
-    //     parameters.standBy = standBy;
-
-    //     parameters.save(function (err) {
-    //         if (err) console.log(err);
-
-    //         res.send("Success!")
-    //     });
-    // });
-    res.send("Success!")
-
-});
-
 /////////////////////////////// Arduino test ///////////////////////////////////////////////////////
 /*
  * Get / (Home page)
@@ -283,12 +234,6 @@ router.get('/testArduino', (req, res) => {
     });
     res.render('index.ejs')
 });
-
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 
 /*
  * post 
@@ -315,7 +260,6 @@ router.post('/send', async (req, res) => {
                 return console.log('Error on write: ', err.message);
             }
             console.log('message written');
-            // await wait_for_acknowledge();
             console.log("sending response")
             res.send("Success!");
         });
