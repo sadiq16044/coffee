@@ -260,6 +260,7 @@
                 dataType: 'json'
             })
             .done(function(msg) {
+                console.log('First response');
                 console.log(msg)
             });
     }
@@ -272,7 +273,6 @@
         stopFlag = false;
         parametersWrite = true; // to update the parameters in disk file
         await send(Order.START, 0); // sending to start to make coffee
-        parametersWrite = false;
     }
 
     async function stop() {
@@ -281,6 +281,7 @@
         abortWork = true;
         startFlag = false;
         // eel.order_stop();
+        parametersWrite = false;
         await send(Order.STOP, 0); // sending to start to make coffee
 
     }
@@ -291,12 +292,14 @@
         $('.carousel').carousel({
             interval: false,
         });
-        $('#myCarousel-indicators').on('slide.bs.carousel', function(event) {
+        $('#myCarousel-indicators').on('slide.bs.carousel', async function(event) {
             console.log('I am sliding ' + valueChange)
-            if (valueChange) {
+            console.log('startFlag ' + startFlag)
+            if (valueChange || startFlag) {
                 event.preventDefault();
                 valueChange = false;
             }
+            await send(Order.STANDBY, (parseFloat($("#standBy").val())));
         });
         $("#start_button").click(async function() {
 
@@ -403,6 +406,7 @@
             change: function(args) {
                 $("#temp").val(args.value.toString());
                 update_ready = true;
+                parametersWrite = true; // to update the parameters in disk file
                 if (heated == 1 && onState == 1 && !startFlag) {
                     send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10));
                     update_ready = false;
@@ -436,6 +440,7 @@
             change: function(args) {
                 $("#druck").val(args.value.toString());
                 update_ready = true;
+                parametersWrite = true; // to update the parameters in disk file
                 if (heated == 1 && onState == 1 && !startFlag) {
                     send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10));
                     update_ready = false;
@@ -469,6 +474,7 @@
             change: function(args) {
                 $("#bezug").val(args.value.toString());
                 update_ready = true;
+                parametersWrite = true; // to update the parameters in disk file
                 if (heated == 1 && onState == 1 && !startFlag) {
                     send(Order.TIME, (parseFloat($("#bezug").val()) * 10));
                     update_ready = false;
@@ -503,6 +509,7 @@
             change: function(args) {
                 $("#standBy").val(args.value.toString());
                 update_ready = true;
+                parametersWrite = true; // to update the parameters in disk file
                 if (heated == 1 && onState == 1 && !startFlag) {
                     send(Order.STANDBY, (parseFloat($("#standBy").val())));
                     update_ready = false;
@@ -520,13 +527,14 @@
             if (heated == 1 && onState == 1) { //&& polling_allowed == 1
 
                 if (onState == 1) {
+                    parametersWrite = false;
                     await send(Order.ONSTATE, 0); // sending to get the state of coffee machine
                     // await send(Order.ERROR, 0); // sending to get if there is an error in coffee machine
                     // await send(Order.HEATING, 0); // sending to get if there is an error in coffee machine
 
                 }
 
-                setTimeout(function() {
+                setTimeout(async function() {
                     if (errorNumber > 1) {
                         // document.getElementById("errorblocker").style.visibility = "visible";
                         // document.getElementById("errorNumber").style.visibility = "visible";
@@ -548,16 +556,19 @@
                     }
 
                     if (update_ready && !startFlag) {
-                        send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10));
-                        send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10));
-                        send(Order.TIME, (parseFloat($("#bezug").val()) * 10));
-                        send(Order.STANDBY, (parseFloat($("#standBy").val())));
+                        parametersWrite = true;
+                        await send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10));
+                        await send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10));
+                        await send(Order.TIME, (parseFloat($("#bezug").val()) * 10));
+                        // await send(Order.STANDBY, (parseFloat($("#standBy").val())));
                         update_ready = false;
                     }
                 }, 200);
             } else {
+                parametersWrite = false;
                 await send(Order.ONSTATE, 0); // sending get the state of coffee machine
-                // await send(Order.HEATING, 0); // sending get the state of coffee machine
+                console.log('Second running')
+                    // await send(Order.HEATING, 0); // sending get the state of coffee machine
             }
 
         }, 5000);
@@ -610,7 +621,14 @@
         height: 710px !important;
         margin-top: 45px;
         margin-left: 150px;
+        transition-duration: 1s;
     }
+    /* .carousel-inner>.item {
+        -webkit-transition: 1s ease-in-out left;
+        -moz-transition: 1s ease-in-out left;
+        -o-transition: 1s ease-in-out left;
+        transition: 1s ease-in-out left;
+    } */
     
     #parameter-name {
         font-family: 'helvetica_neueultralight';
