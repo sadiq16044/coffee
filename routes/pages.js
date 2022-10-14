@@ -203,7 +203,7 @@ router.get('/', async (req, res) => {
 
 
     if (!connected_Arduino) {
-        // await open_serialPort();
+        await open_serialPort();
         console.log('open serial port')
     }
 
