@@ -29,7 +29,7 @@
         <div id="myCarousel-indicators" class="carousel slide" data-touch="true" data-ride="carousel">
 
             <ol class="carousel-indicators">
-                <li id="slide0" data-target="#myCarousel-indicators" data-slide-to="0" class="active"></li>
+                <li onclick="(()=>{valueChange = false})" id="slide0" data-target="#myCarousel-indicators" data-slide-to="0" class="active"></li>
                 <li id="slide1" data-target="#myCarousel-indicators" data-slide-to="1"></li>
                 <li id="slide2" data-target="#myCarousel-indicators" data-slide-to="2"></li>
                 <li id="slide3" data-target="#myCarousel-indicators" data-slide-to="3"></li>
@@ -114,6 +114,7 @@
     });
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
+    let prev_temperature = 0;
     let progress_counter = 0;
     let making_counter = 0;
     let progress_bar;
@@ -154,6 +155,7 @@
         if (progress_counter >= 100) { // stopping progress bar increment value
             clearInterval(progress_bar);
             setTimeout(function() { // things to do after 9 minutes progress bar
+                $("#progress-bar").roundSlider("setValue", 0);
                 $('#progress-circle').fadeOut(500); // fadeout the progress bar
                 setTimeout(() => $('#not-pushed').fadeIn(1000), 500) // showing the carousel
             }, 1000); // time of progress bar to complete 100%
@@ -227,9 +229,15 @@
             case Order.ONSTATE:
                 onState = value;
                 if (onState == 1 && prev_onState != onState) {
-                    $('#full-page1').fadeIn(500); // showing the body content
+                    $("#fade1").fadeIn(2000); // showing the logo in 2 secs with fading effects
+                    setTimeout(() => {
+                        $("#fade1").fadeOut(2000); // hiding the logo in 2 secs with fading effects
+                        setTimeout(() => $('#full-page1').fadeIn(1000), 2000); // showing the body content
+                    }, 2000);
                 } else if (onState == 0 && prev_onState != onState) {
                     $('#full-page1').fadeOut(500); // hiding the body content
+                    $("#fade1").fadeIn(2000); // removing the div after 5 secs with fading effects
+                    setTimeout(() => $("#fade1").fadeOut(2000), 2000);
                 }
                 prev_onState = onState;
                 break;
@@ -340,24 +348,32 @@
                 // }, 1000); // time of progress bar to complete 100%
 
                 clearInterval(making_timer);
-                making_counter = 0;
-                $('#pushed').fadeOut(500); // fadeout the after pushed button
-                $('#making_time').fadeOut(500); // fadeout the after pushed button
                 setTimeout(() => {
-                    update_ready = true; // to send data if data changes before the coffee making stops 
-                    $('#not-pushed').fadeIn(500); // fadeIn the before pushed button
-                    $('.carousel-indicators').fadeIn(500); // showing the carousel
-                }, 500)
+                    making_counter = 0;
+                    $('#pushed').fadeOut(500); // fadeout the after pushed button
+                    $('#making_time').fadeOut(500); // fadeout the after pushed button
+                    setTimeout(() => {
+                        update_ready = true; // to send data if data changes before the coffee making stops 
+                        $('#not-pushed').fadeIn(500); // fadeIn the before pushed button
+                        $('.carousel-indicators').fadeIn(500); // showing the carousel
+                    }, 500)
+                }, 4000)
             }
         });
 
-        $("#fade1").fadeIn(5000); // removing the div after 5 secs with fading effects
-        setTimeout(() => $("#fade1").fadeOut(5000), 5000)
+        //////////////////////////////////////////// starting fading in and out of contents ///////////////////////////////////////
+        let logo_fading = 5000; // logo fading time in milliseconds (5 seconds)
+        // let logo_fading = 1000; // logo fading time in milliseconds (1 seconds for testing)
+        $("#fade1").fadeIn(logo_fading); // removing the div after 5 secs with fading effects
+        setTimeout(() => $("#fade1").fadeOut(logo_fading), logo_fading)
             // $("#fade1").fadeOut(5000); // removing the div after 5 secs with fading effects
         setTimeout(function() {
             $('#full-page1').fadeIn(1000); // showing the carousel slides
-            progress_bar = setInterval(progressBar, 600);
-        }, 10000); // branding logo 10 seconds delay
+            let progressBar_time = 1; // time in minutes
+            progress_counter = 0;
+            progress_bar = setInterval(progressBar, progressBar_time * 600);
+        }, 2 * logo_fading); // branding logo fade in fade out time
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         $.fn.roundSlider.prototype._handleDragDistance = 90;
 
@@ -404,6 +420,7 @@
             lineCap: 'round',
             tooltipFormat: "tooltipTemp",
             change: function(args) {
+                prev_temperature = parseFloat($("#temp").val()).toFixed(2);
                 $("#temp").val(args.value.toString());
                 update_ready = true;
                 parametersWrite = true; // to update the parameters in disk file
@@ -412,6 +429,18 @@
                     update_ready = false;
                 }
                 console.log(args.value);
+                valueChange = false;
+
+                /////////////////////////// For showing the progress bar when temperature changes ///////////////////////////////
+                // $('#not-pushed').fadeOut(1);
+                // $('#progress-circle').fadeIn(1); // fadeout the progress bar
+                // $('.carousel').carousel(0);
+                // let temp_diff = Math.abs(prev_temperature - parseFloat(args.value).toFixed(2));
+                // console.log('Temperature difference: ' + temp_diff);
+                // progress_counter = 0;
+                // progress_bar = setInterval(progressBar, temp_diff * 1000); // it will show the difference of temperature in progress (10s/0.1 deg)
+                // temp_diff * 1000-- > 0.1 * 1000 = 100 mSec for 1 % => 100 ms * 100 % = 10000 mSec
+
             },
             drag: function(args) {
                 valueChange = true;
@@ -446,6 +475,7 @@
                     update_ready = false;
                 }
                 console.log(args.value);
+                valueChange = false;
             },
             drag: function(args) {
                 valueChange = true;
@@ -480,6 +510,7 @@
                     update_ready = false;
                 }
                 console.log(args.value);
+                valueChange = false;
             },
             drag: function(args) {
                 valueChange = true;
@@ -515,6 +546,7 @@
                     update_ready = false;
                 }
                 console.log(args.value);
+                valueChange = false;
             },
             drag: function(args) {
                 valueChange = true;
@@ -523,7 +555,7 @@
 
         let polling = setInterval(async function() { // it will tell take the response of coffee machine is on and heated in timely basis
             heated = 1;
-            // onState = 1;
+            onState = 1;
             if (heated == 1 && onState == 1) { //&& polling_allowed == 1
 
                 if (onState == 1) {
@@ -621,7 +653,7 @@
         height: 710px !important;
         margin-top: 45px;
         margin-left: 150px;
-        transition-duration: 1s;
+        transition-duration: 3s;
     }
     /* .carousel-inner>.item {
         -webkit-transition: 1s ease-in-out left;

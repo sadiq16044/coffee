@@ -201,13 +201,13 @@ function connecting_to_arduino() {
  */
 router.get('/', async (req, res) => {
 
-    
+
     if (!connected_Arduino) {
-        await open_serialPort();
+        // await open_serialPort();
         console.log('open serial port')
     }
 
-    fs.readFile('parameters.txt', (err,data) => {
+    fs.readFile('parameters.txt', (err, data) => {
         if (err) console.log(err);
         let data1 = JSON.parse(data);
         console.log(data1)
@@ -222,19 +222,6 @@ router.get('/', async (req, res) => {
     });
 });
 
-/////////////////////////////// Arduino test ///////////////////////////////////////////////////////
-/*
- * Get / (Home page)
- */
-router.get('/testArduino', (req, res) => {
-
-    fs.writeFile('parameters.txt', 'Hello World!', function (err) {
-        if (err) return console.log(err);
-        console.log('Hello World > helloworld.txt');
-    });
-    res.render('index.ejs')
-});
-
 /*
  * post 
  */
@@ -242,7 +229,6 @@ router.post('/send', async (req, res) => {
 
     let sendText = req.body.sendText;
     console.log('req.body.sendText: ' + sendText);
-
     if (connected_Arduino) {
         port.write(sendText, async (err) => {
             if (err) {
@@ -254,23 +240,27 @@ router.post('/send', async (req, res) => {
             if (req.body.parametersUpdate) {
 
                 let parameters = req.body.parameters;
-                let writeText = `Temperature:${parameters.temperature} \n Druck:${parameters.druck} \n 
-                Bezugszeit:${parameters.bezugszeit} \n StandBy:${parameters.standBy}`;
+                let obj = {
+                    temperature: parseFloat(parameters.temperature),
+                    druck: parseFloat(parameters.druck),
+                    bezugszeit: parseFloat(parameters.bezugszeit),
+                    standBy: parseFloat(parameters.standBy),
+                }
 
-                fs.writeFile('parameters.txt', writeText, function (err) {
-                    if (err) return console.log(err);
+                fs.writeFile('parameters.txt', JSON.stringify(obj), function (err) {
+                    if (err) console.log(err);
                     console.log('Parameters Written!');
+                    res.send("Success!");
                 });
 
+            } else {
+                res.send("Success!");
             }
-            res.send("Success!");
         });
     } else {
-        console.log(req.body.parametersUpdate);
         if (req.body.parametersUpdate) {
 
             let parameters = req.body.parameters;
-            let writeText = `Temperature:${parameters.temperature}\nDruck:${parameters.druck}\nBezugszeit:${parameters.bezugszeit}\nStandBy:${parameters.standBy}`;
             let obj = {
                 temperature: parseFloat(parameters.temperature),
                 druck: parseFloat(parameters.druck),
@@ -292,16 +282,32 @@ router.post('/send', async (req, res) => {
 });
 
 /*
- * post 
+ * Get /test
  */
-router.post('/receive', (req, res) => {
+// router.get('/test', (req, res) => {
 
-    let msg = req.body.value
-    console.log(msg)
-    console.log(msg_receive)
-    res.send(msg_receive)
+//     res.render('test.ejs')
+// });
 
-});
+// /*
+//  * post /test
+//  */
+// router.post('/test', (req, res) => {
+
+//     let value = req.body.onState; 
+//     prev_msg_receive = {
+//         order: Order.ONSTATE,
+//         value: value
+//     }
+//     let content = {
+//         msg: "Response from Arduino",
+//         action: true,
+//         response: prev_msg_receive,
+//     }
+//     sse.send(content, 'data');
+//     res.send({ msg: 'success' })
+
+// });
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //export
