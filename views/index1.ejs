@@ -26,7 +26,7 @@
     </div>
 
     <div id="full-page1" class="full-page" style="display: none;">
-        <div id="myCarousel-indicators" class="carousel slide" data-touch="true" data-ride="carousel">
+        <div id="myCarousel-indicators" class="carousel slide carousel-fade" data-touch="true" data-ride="carousel">
 
             <ol class="carousel-indicators">
                 <li onclick="(()=>{valueChange = false})" id="slide0" data-target="#myCarousel-indicators" data-slide-to="0" class="active"></li>
@@ -110,6 +110,7 @@
             received_response(response.order, response.value);
         } else if (data.msg == 'connected') {
             update_ready = true;
+            location.reload(1);
         }
     });
 
@@ -210,7 +211,7 @@
     let stopFlag = false;
     let noStop = false;
     let onState = 0;
-    let prev_onState = 0;
+    let prev_onState = 1;
     let errorNumber = 0;
     let parametersWrite = false;
     let heated = 0;
@@ -555,7 +556,7 @@
 
         let polling = setInterval(async function() { // it will tell take the response of coffee machine is on and heated in timely basis
             heated = 1;
-            onState = 1;
+            onState = 0;
             if (heated == 1 && onState == 1) { //&& polling_allowed == 1
 
                 if (onState == 1) {
@@ -598,9 +599,9 @@
                 }, 200);
             } else {
                 parametersWrite = false;
-                await send(Order.ONSTATE, 0); // sending get the state of coffee machine
                 console.log('Second running')
-                    // await send(Order.HEATING, 0); // sending get the state of coffee machine
+                await send(Order.ONSTATE, 0); // sending get the state of coffee machine
+                // await send(Order.HEATING, 0); // sending get the state of coffee machine
             }
 
         }, 5000);

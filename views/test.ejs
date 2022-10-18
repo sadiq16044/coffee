@@ -39,12 +39,13 @@
 <script>
     function send(value) {
         console.log('send')
-            // $.post("http://localhost:3003/test", {
-            //         value: value,
-            //     },
-            //     function(data, status) {
-            //         console.log(data);
-            //     });
+        location.reload(1);
+        // $.post("http://localhost:3003/test", {
+        //         value: value,
+        //     },
+        //     function(data, status) {
+        //         console.log(data);
+        //     });
 
         $.ajax({
                 url: "http://localhost:3003/test",
