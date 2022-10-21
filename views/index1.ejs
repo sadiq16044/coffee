@@ -216,7 +216,8 @@
     let parametersWrite = false;
     let heated = 0;
     let showCoffeeFlag = true;
-    let update_ready = true;
+    let update_ready = false;
+    let dragging = false;
 
     function received_response(order, value) {
 
@@ -431,20 +432,28 @@
                 }
                 console.log(args.value);
                 valueChange = false;
+                dragging = false;
 
                 /////////////////////////// For showing the progress bar when temperature changes ///////////////////////////////
-                // $('#not-pushed').fadeOut(1);
-                // $('#progress-circle').fadeIn(1); // fadeout the progress bar
-                // $('.carousel').carousel(0);
-                // let temp_diff = Math.abs(prev_temperature - parseFloat(args.value).toFixed(2));
-                // console.log('Temperature difference: ' + temp_diff);
-                // progress_counter = 0;
-                // progress_bar = setInterval(progressBar, temp_diff * 1000); // it will show the difference of temperature in progress (10s/0.1 deg)
+                $('#not-pushed').fadeOut(1);
+                $('#progress-circle').fadeIn(1); // fadeout the progress bar
+                $('.carousel').carousel(0);
+                let temp_diff = Math.abs(prev_temperature - parseFloat(args.value).toFixed(2));
+                console.log('Temperature difference: ' + temp_diff);
+                progress_counter = 0;
+                progress_bar = setInterval(progressBar, temp_diff * 1000); // it will show the difference of temperature in progress (10s/0.1 deg)
                 // temp_diff * 1000-- > 0.1 * 1000 = 100 mSec for 1 % => 100 ms * 100 % = 10000 mSec
 
             },
-            drag: function(args) {
+            start: function(args) {
+                console.log('My dragging start');
+                dragging = true;
                 valueChange = true;
+            },
+            stop: function(args) {
+                console.log('I am stopped');
+                valueChange = false;
+                dragging = false;
             }
         });
         $("#druck-slider").roundSlider({
@@ -477,9 +486,17 @@
                 }
                 console.log(args.value);
                 valueChange = false;
+                dragging = false;
             },
-            drag: function(args) {
+            start: function(args) {
+                console.log('My dragging start');
+                dragging = true;
                 valueChange = true;
+            },
+            stop: function(args) {
+                console.log('I am stopped');
+                valueChange = false;
+                dragging = false;
             }
         });
         $("#bezug-slider").roundSlider({
@@ -512,9 +529,17 @@
                 }
                 console.log(args.value);
                 valueChange = false;
+                dragging = false;
             },
-            drag: function(args) {
+            start: function(args) {
+                console.log('My dragging start');
+                dragging = true;
                 valueChange = true;
+            },
+            stop: function(args) {
+                console.log('I am stopped');
+                valueChange = false;
+                dragging = false;
             }
         });
         $("#standBy-slider").roundSlider({
@@ -548,18 +573,27 @@
                 }
                 console.log(args.value);
                 valueChange = false;
+                dragging = false;
+                console.log('I am changed');
             },
-            drag: function(args) {
+            start: function(args) {
+                console.log('My dragging start');
+                dragging = true;
                 valueChange = true;
+            },
+            stop: function(args) {
+                console.log('I am stopped');
+                valueChange = false;
+                dragging = false;
             }
         });
 
         let polling = setInterval(async function() { // it will tell take the response of coffee machine is on and heated in timely basis
             heated = 1;
-            onState = 0;
+            onState = 1;
             if (heated == 1 && onState == 1) { //&& polling_allowed == 1
 
-                if (onState == 1) {
+                if (onState == 1 && !dragging) {
                     parametersWrite = false;
                     await send(Order.ONSTATE, 0); // sending to get the state of coffee machine
                     // await send(Order.ERROR, 0); // sending to get if there is an error in coffee machine
@@ -589,11 +623,14 @@
                     }
 
                     if (update_ready && !startFlag) {
+                        console.log('Sending all parameters to arduino!');
                         parametersWrite = true;
                         await send(Order.TEMPERATURE, (parseFloat($("#temp").val()) * 10));
                         await send(Order.PRESSURE, (parseFloat($("#druck").val()) * 10));
                         await send(Order.TIME, (parseFloat($("#bezug").val()) * 10));
-                        // await send(Order.STANDBY, (parseFloat($("#standBy").val())));
+                        await send(Order.STANDBY, (parseFloat($("#standBy").val())));
+                        console.log('Sending completed!');
+                        parametersWrite = false;
                         update_ready = false;
                     }
                 }, 200);
@@ -655,12 +692,13 @@
         margin-top: 45px;
         margin-left: 150px;
         transition-duration: 3s;
+        /* transition: transform 10s ease-in, transform 5s ease-out, opacity 5s 0s; */
     }
     /* .carousel-inner>.item {
-        -webkit-transition: 1s ease-in-out left;
-        -moz-transition: 1s ease-in-out left;
-        -o-transition: 1s ease-in-out left;
-        transition: 1s ease-in-out left;
+        -webkit-transition: 31s ease-in-out left;
+        -moz-transition: 3s ease-in-out left;
+        -o-transition: 3s ease-in-out left;
+        transition: 3s ease-in-out left;
     } */
     
     #parameter-name {

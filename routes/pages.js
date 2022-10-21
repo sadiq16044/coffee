@@ -148,7 +148,7 @@ async function open_serialPort() {
 
                         console.log("Connection build again!");
                         let content = {
-                            msg: "connected",
+                            msg: "reconnected",
                             action: false,
                             response: '',
                         }
@@ -167,11 +167,26 @@ async function open_serialPort() {
                             response: '',
                         }
                         sse.send(content, 'data');
+
+                        // fs.readFile('parameters.txt', (err, data) => {
+                        //     if (err) console.log(err);
+                        //     let data1 = JSON.parse(data);
+                        //     console.log(data1)
+
+                        //     let sentText = `${Order.TEMPERATURE}<${data1.temperature}>`
+                        //     sendParameter(sentText);
+                        //     sentText = `${Order.PRESSURE}<${data1.druck}>`
+                        //     sendParameter(sentText);
+                        //     sentText = `${Order.TIME}<${data1.bezugszeit}>`
+                        //     sendParameter(sentText);
+                        //     sentText = `${Order.STANDBY}<${data1.standBy}>`
+                        //     sendParameter(sentText);
+                        // });
+
                     } else {
                         console.log("Not getting arduino response..."); // means connection not established
                         connecting_to_arduino(); // sending handshake request again
                     }
-
                 }
             });
         });
@@ -194,6 +209,15 @@ function connecting_to_arduino() {
 
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function sendParameter(sendText) {
+    port.write(sendText, async (err) => {
+        if (err) {
+            return console.log('Error on write: ', err.message);
+        }
+        console.log('message written');
+    });
+}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
