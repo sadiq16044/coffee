@@ -144,6 +144,16 @@ async function open_serialPort() {
                             }
                             console.log('Sending connection making request again!');
                         });
+                    } else if (msg_receive.order == Order.START) {
+
+                        console.log("Start the Machine!");
+                        let content = {
+                            msg: "Response from Arduino",
+                            action: true,
+                            response: msg_receive,
+                        }
+                        sse.send(content, 'data');
+
                     } else if (msg_receive.order == Order.HELLO || msg_receive.order == Order.ALREADY_CONNECTED) {
 
                         console.log("Connection build again!");
