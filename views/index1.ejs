@@ -184,9 +184,7 @@
             }, 4000);
         }
     }
-
     ////////////////////////////////////////////// Functions for Serial ////////////////////////////////////////////////
-
     let Order = {
         HELLO: 0,
         ALREADY_CONNECTED: 1,
@@ -219,7 +217,7 @@
     let update_ready = false;
     let dragging = false;
 
-    function received_response(order, value) {
+    async function received_response(order, value) {
 
         switch (order) {
             case Order.ERROR:
@@ -227,6 +225,9 @@
                 break;
             case Order.HEATING:
                 heated = value;
+                break;
+            case Order.START:
+                making_timer = setInterval(makingTime, 100);
                 break;
             case Order.ONSTATE:
                 onState = value;
@@ -338,7 +339,7 @@
             }, 500);
             setTimeout(async() => { // starting timer of making coffee
                 await start(); // calling to send starting commands
-                making_timer = setInterval(makingTime, 100);
+                // making_timer = setInterval(makingTime, 100);
             }, 1000);
 
         });
@@ -691,8 +692,13 @@
         height: 710px !important;
         margin-top: 45px;
         margin-left: 150px;
-        transition-duration: 3s;
-        /* transition: transform 10s ease-in, transform 5s ease-out, opacity 5s 0s; */
+        transition-duration: 1s;
+        transition: transform 4s ease-in-out;
+    }
+    
+    .carousel-fade .active.carousel-item-start,
+    .carousel-fade .active.carousel-item-end {
+        transition: opacity 0s 4s;
     }
     /* .carousel-inner>.item {
         -webkit-transition: 31s ease-in-out left;

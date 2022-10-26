@@ -154,6 +154,38 @@ async function open_serialPort() {
                         }
                         sse.send(content, 'data');
 
+                    } else if (msg_receive.order == Order.STARTED) {
+
+                        let sentText;
+                        switch (msg_receive.value) {
+                            case 0:
+                                console.log("Sending Temperature");
+                                sentText = `${Order.TEMPERATURE}<${current_parameters.temperature}>`
+                                sendParameter(sentText);
+                                break;
+                            case 1:
+                                console.log("Sending PRESSURE");
+                                sentText = `${Order.PRESSURE}<${current_parameters.druck}>`
+                                sendParameter(sentText);
+                                break;
+                            case 2:
+                                console.log("Sending Delivery TIME");
+                                sentText = `${Order.TIME}<${current_parameters.bezugszeit}>`
+                                sendParameter(sentText);
+                                break;
+                            case 3:
+                                console.log("Sending STANDBY time");
+                                sentText = `${Order.STANDBY}<${current_parameters.standBy}>`
+                                sendParameter(sentText);
+                                let content = {
+                                    msg: "parameters sent",
+                                    action: false,
+                                    response: '',
+                                }
+                                sse.send(content, 'data');
+                                break;
+                        }
+
                     }
 
                 } else { // sending handshaking request to arduino
@@ -167,21 +199,6 @@ async function open_serialPort() {
                             response: '',
                         }
                         sse.send(content, 'data');
-
-                        // fs.readFile('parameters.txt', (err, data) => {
-                        //     if (err) console.log(err);
-                        //     let data1 = JSON.parse(data);
-                        //     console.log(data1)
-
-                        //     let sentText = `${Order.TEMPERATURE}<${data1.temperature}>`
-                        //     sendParameter(sentText);
-                        //     sentText = `${Order.PRESSURE}<${data1.druck}>`
-                        //     sendParameter(sentText);
-                        //     sentText = `${Order.TIME}<${data1.bezugszeit}>`
-                        //     sendParameter(sentText);
-                        //     sentText = `${Order.STANDBY}<${data1.standBy}>`
-                        //     sendParameter(sentText);
-                        // });
 
                     } else {
                         console.log("Not getting arduino response..."); // means connection not established
@@ -219,29 +236,29 @@ function sendParameter(sendText) {
     });
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+let current_parameters;
 /*
  * Get / (Home page)
  */
 router.get('/', async (req, res) => {
 
-
-    if (!connected_Arduino) {
-        await open_serialPort();
-        console.log('open serial port')
-    }
-
-    fs.readFile('parameters.txt', (err, data) => {
+    fs.readFile('parameters.txt', async (err, data) => {
         if (err) console.log(err);
         let data1 = JSON.parse(data);
         console.log(data1)
+        current_parameters = {
+            temperature: data1.temperature,
+            druck: data1.druck,
+            bezugszeit: data1.bezugszeit,
+            standBy: data1.standBy,
+        };
+
+        if (!connected_Arduino) {
+            await open_serialPort();
+            console.log('open serial port')
+        }
         res.render('index1.ejs', {
-            parameters: {
-                temperature: data1.temperature,
-                druck: data1.druck,
-                bezugszeit: data1.bezugszeit,
-                standBy: data1.standBy,
-            }
+            parameters: current_parameters
         });
     });
 });
@@ -264,14 +281,14 @@ router.post('/send', async (req, res) => {
             if (req.body.parametersUpdate) {
 
                 let parameters = req.body.parameters;
-                let obj = {
-                    temperature: parseFloat(parameters.temperature),
-                    druck: parseFloat(parameters.druck),
-                    bezugszeit: parseFloat(parameters.bezugszeit),
-                    standBy: parseFloat(parameters.standBy),
+                current_parameters = {
+                    temperature: parseFloat(parameters.temperature).toFixed(2),
+                    druck: parseFloat(parameters.druck).toFixed(2),
+                    bezugszeit: parseFloat(parameters.bezugszeit).toFixed(2),
+                    standBy: parseFloat(parameters.standBy).toFixed(2),
                 }
 
-                fs.writeFile('parameters.txt', JSON.stringify(obj), function (err) {
+                fs.writeFile('parameters.txt', JSON.stringify(current_parameters), function (err) {
                     if (err) console.log(err);
                     console.log('Parameters Written!');
                     res.send("Success!");
@@ -285,14 +302,14 @@ router.post('/send', async (req, res) => {
         if (req.body.parametersUpdate) {
 
             let parameters = req.body.parameters;
-            let obj = {
-                temperature: parseFloat(parameters.temperature),
-                druck: parseFloat(parameters.druck),
-                bezugszeit: parseFloat(parameters.bezugszeit),
-                standBy: parseFloat(parameters.standBy),
+            current_parameters = {
+                temperature: parseFloat(parameters.temperature).toFixed(2),
+                druck: parseFloat(parameters.druck).toFixed(2),
+                bezugszeit: parseFloat(parameters.bezugszeit).toFixed(2),
+                standBy: parseFloat(parameters.standBy).toFixed(2),
             }
 
-            fs.writeFile('parameters.txt', JSON.stringify(obj), function (err) {
+            fs.writeFile('parameters.txt', JSON.stringify(current_parameters), function (err) {
                 if (err) console.log(err);
                 console.log('Parameters Written!');
                 res.send("Success!");

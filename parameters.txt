@@ -1,1 +1,1 @@
-{"temperature":91.6,"druck":9,"bezugszeit":28.3,"standBy":65}
+{"temperature":"90.50","druck":"9.10","bezugszeit":"20.00","standBy":"35.00"}
