@@ -136,6 +136,16 @@ async function open_serialPort() {
                             sse.send(content, 'data');
 
                         }
+                    } else if (msg_receive.order == Order.ONSTATE) {
+
+                        console.log("OnState received");
+                        let content = {
+                            msg: "Response from Arduino",
+                            action: true,
+                            response: msg_receive,
+                        }
+                        sse.send(content, 'data');
+
                     } else if (msg_receive.order == Order.PING) {
 
                         port.write("0<0>", (err) => { // sending hello to make handshake connection again if lost
@@ -264,7 +274,7 @@ router.get('/', async (req, res) => {
         };
 
         if (!connected_Arduino) {
-            await open_serialPort();
+            open_serialPort();
             console.log('open serial port')
         }
         res.render('index1.ejs', {
@@ -332,23 +342,24 @@ router.post('/send', async (req, res) => {
 
 });
 
-/*
- * Get /test
- */
+// /*
+//  * Get /test
+//  */
 // router.get('/test', (req, res) => {
 
 //     res.render('test.ejs')
 // });
 
-// /*
-//  * post /test
-//  */
+// // /*
+// //  * post /test
+// //  */
 // router.post('/test', (req, res) => {
 
+//     console.log('//////////////////////////////////////////////////////////////////////////////////');
 //     let value = req.body.onState; 
 //     prev_msg_receive = {
-//         order: Order.ONSTATE,
-//         value: value
+//         order: Order.START,
+//         value: 1
 //     }
 //     let content = {
 //         msg: "Response from Arduino",
